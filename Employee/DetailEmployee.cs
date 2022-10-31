@@ -167,22 +167,22 @@ namespace SMTAttendance
 
         private void editEmployee()
         {
-            if (tbRFID.Text == "" || tbBadgeid.Text == "" || tbName.Text == "" || cmbGender.Text == "" || dateTimePickerDOJ.Text == ""
+            try
+            {
+                if (tbRFID.Text == "" || tbBadgeid.Text == "" || tbName.Text == "" || cmbGender.Text == "" || dateTimePickerDOJ.Text == ""
                 || cmbLevel.Text == "" || cmbDepartment.Text == "" || cmbLineCode.Text == "" || cmbShift.Text == "" || cmbWorkarea.Text == "")
-            {
-                MessageBox.Show(this, "Unable Edit Employee with let any field blank", "Edit Employee", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            else if (tbBadgeid.Text != "" && tbBadgeid.Text.Length != 6)
-            {
-                MessageBox.Show("Wrong Badge ID, please fill Badge ID Properly", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                tbBadgeid.Text = string.Empty;
-            }
-            else
-            {
-                string koneksi = ConnectionDB.strProvider;
-                myConn = new MySqlConnection(koneksi);
-                try
                 {
+                    MessageBox.Show(this, "Unable Edit Employee with let any field blank", "Edit Employee", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (tbBadgeid.Text != "" && tbBadgeid.Text.Length != 6)
+                {
+                    MessageBox.Show("Wrong Badge ID, please fill Badge ID Properly", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    tbBadgeid.Text = string.Empty;
+                }
+                else
+                {
+                    string koneksi = ConnectionDB.strProvider;
+                    myConn = new MySqlConnection(koneksi);
                     var cmd = new MySqlCommand("", myConn);
                     string rfid = tbRFID.Text;
                     string badgeid = tbBadgeid.Text;
@@ -203,7 +203,7 @@ namespace SMTAttendance
 
                     // insert schedule if employee is normal shift and update data tbl_employee
                     if (shift == "Normal" || shift == "normal")
-                    {                        
+                    {
                         // query update employee
                         string Query2 = "UPDATE tbl_employee SET rfidNo = '" + rfid + "', gender = '" + gender + "', doj = '" + doj + "', " +
                         "level = '" + level + "', dept = '" + department + "', linecode = '" + linecode + "', shift = '" + shift + "', workarea = '" + workarea + "', " +
@@ -233,17 +233,18 @@ namespace SMTAttendance
                     myConn.Close();
                     MessageBox.Show(this, "Employee Successfully Updated", "Edit Employee", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
-                }
-                catch (Exception ex)
-                {
-                    myConn.Close();
-                    MessageBox.Show(ex.Message.ToString());
-                }
-                finally
-                {
-                    myConn.Dispose();
+
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                //MessageBox.Show(ex.Message.ToString());
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void cmbDepartment_SelectedIndexChanged(object sender, EventArgs e)
