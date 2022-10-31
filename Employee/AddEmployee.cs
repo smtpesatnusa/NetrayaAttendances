@@ -10,7 +10,7 @@ namespace SMTAttendance
     {
         Helper help = new Helper();
         string idUser,dept;
-
+        MySqlConnection myConn;
         public AddEmployee()
         {
             InitializeComponent();
@@ -46,7 +46,8 @@ namespace SMTAttendance
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
             if (tbRFID.Text == "" || tbBadgeid.Text == "" || tbName.Text == "" || cmbGender.Text == "" ||  dateTimePickerDOJ.Text == "" 
                 || cmbLevel.Text == "" || cmbDepartment.Text == "" || cmbLineCode.Text == "" || cmbShift.Text == "" || cmbWorkarea.Text == "")
@@ -59,10 +60,10 @@ namespace SMTAttendance
                 tbBadgeid.Text = string.Empty;
             }
             else
-            {
+            {                
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string rfid = tbRFID.Text;
                     string badgeid = tbBadgeid.Text;
                     string name = tbName.Text;
@@ -71,16 +72,15 @@ namespace SMTAttendance
                     string department = cmbDepartment.Text;
                     string linecode = cmbLineCode.Text; 
                     string gender = cmbGender.Text;
-                    string workarea = cmbWorkarea.Text;                  
+                    string workarea = cmbWorkarea.Text;                 
                                        
-
                     // date
                     string _Date = dateTimePickerDOJ.Text;
                     DateTime dt = Convert.ToDateTime(_Date);
                     string doj = dt.ToString("yyyy-MM-dd");
 
                     string cekdata = "SELECT * FROM tbl_employee WHERE badgeID = '" + badgeid + "' OR rfidNo = '" + rfid + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdata, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdata, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -94,7 +94,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
 
                             if (shift == "Normal" || shift == "normal")
                             {
@@ -106,17 +106,12 @@ namespace SMTAttendance
                                 "VALUES ('" + badgeid + "', '" + rfid + "','" + name + "','" + gender + "','" + doj + "','" + level + "','" + department + "'" +
                                 ",'" + linecode + "','" + shift + "','" + workarea + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "','" + workday + "','" + offday + "')";
 
-                                // query insert data schedule normal Shift
-                                string Query = "INSERT INTO tbl_schedule (badgeId, shiftId, dateShift, createDate, createBy) " +
-                                    "VALUES ('" + badgeid + "', (SELECT id FROM tbl_mastershiftdetail WHERE category = 'Normal'), '1601-01-01', '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
-
-                                string[] allQuery = { queryAdd, Query };
+                                string[] allQuery = { queryAdd };
                                 for (int j = 0; j < allQuery.Length; j++)
                                 {
                                     cmd.CommandText = allQuery[j];
                                     cmd.ExecuteNonQuery();
                                 }
-
                             }
                             else if (shift == "Shift" || shift == "shift")
                             {
@@ -130,9 +125,9 @@ namespace SMTAttendance
 
                                 cmd.CommandText = queryAdd;
                                 cmd.ExecuteNonQuery();
-                            }                               
+                            }                              
 
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Employee Successfully Added", "Add Employee", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.Close();
                         }
@@ -140,12 +135,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

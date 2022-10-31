@@ -10,7 +10,7 @@ namespace SMTAttendance
     {
         readonly Helper help = new Helper();
         string idUser, dept;
-
+        MySqlConnection myConn;
         public Genderlist()
         {
             InitializeComponent();
@@ -63,11 +63,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT name,description from tbl_mastergender ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -86,12 +87,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -110,15 +111,16 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string gender = tbGender.Text;
                     string desc = tbDesc.Text;
 
                     string cek = "SELECT * FROM tbl_mastergender WHERE name = '" + gender + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -133,7 +135,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_mastergender (name, description, createDate, createBy) VALUES " +
                                 "('" + gender + "', '" + desc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -145,7 +147,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Gender Successfully Added", "Add Gender", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             tbGender.Clear();
                             tbDesc.Clear();
@@ -156,12 +158,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -227,24 +229,25 @@ namespace SMTAttendance
             int i;
             i = dataGridViewGenderList.SelectedCells[0].RowIndex;
             string slctd = dataGridViewGenderList.Rows[i].Cells[0].Value.ToString();
-
-            if (e.ColumnIndex == 2)
+            try
             {
-                string message = "Do you want to delete this Gender " + slctd + "?";
-                string title = "Delete Gender";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 2)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
-                    try
+                    string message = "Do you want to delete this Gender " + slctd + "?";
+                    string title = "Delete Gender";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        string koneksi = ConnectionDB.strProvider;
+                        myConn = new MySqlConnection(koneksi);
+
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_mastergender WHERE name = '" + slctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -255,25 +258,22 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
-                        Genderlist genderlist = new Genderlist();
-                        genderlist.toolStripUsername.Text = toolStripUsername.Text;
-                        genderlist.Show();
-                        this.Hide();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Gender List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Gender", "Gender List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+                        refresh();
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected Gender", "Gender List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void refreshLbl_Click(object sender, EventArgs e)

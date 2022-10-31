@@ -20,6 +20,7 @@ namespace SMTAttendance
         private string Sql;
 
         string idUser, dept;
+        MySqlConnection myConn;
 
         public PublicHoliday()
         {
@@ -215,10 +216,11 @@ namespace SMTAttendance
 
         private void LoadDS(string SQL)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
-                MySqlDataAdapter da = new MySqlDataAdapter(SQL, connectionDB.connection);
+                MySqlDataAdapter da = new MySqlDataAdapter(SQL, myConn);
                 ds = new DataSet();
 
                 // Fill the DataSet.
@@ -229,11 +231,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                myConn.Close();
+                //MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -273,10 +276,11 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
-                connectionDB.connection.Open();
+                myConn.Open();
 
                 Sql = "SELECT name, date FROM tbl_masterholiday ORDER BY id desc";
 
@@ -289,17 +293,17 @@ namespace SMTAttendance
 
                 CloseProgress();
 
-                connectionDB.connection.Close();
+                myConn.Close();
 
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -329,7 +333,8 @@ namespace SMTAttendance
 
         private void truncatePublicHolidayLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
             string message = "Are you sure want to delete All this Public Holiday Data ?";
             string title = "Delete Public Holiday";
@@ -340,11 +345,11 @@ namespace SMTAttendance
             {
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     string querydelete = "TRUNCATE tbl_masterholiday";
 
-                    connectionDB.connection.Open();
+                    myConn.Open();
 
                     string[] allQuery = { querydelete };
                     for (int j = 0; j < allQuery.Length; j++)
@@ -355,7 +360,7 @@ namespace SMTAttendance
                         //Jalankan perintah / query dalam CommandText pada database
                     }
 
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     PublicHoliday publicHoliday = new PublicHoliday();
                     publicHoliday.toolStripUsername.Text = toolStripUsername.Text;
                     this.Hide();
@@ -364,12 +369,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message);
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message);
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -445,23 +450,23 @@ namespace SMTAttendance
             //    //editPublicHoliday.tbUph.Text = uphslctd;
             //    //editPublicHoliday.ShowDialog();
             //}
-            if (e.ColumnIndex == 2)
+            try
             {
-                string message = "Do you want to delete this Public Holiday with name " + nameslctd + "?";
-                string title = "Delete Public Holiday";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 2)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
-                    try
+                    string message = "Do you want to delete this Public Holiday with name " + nameslctd + "?";
+                    string title = "Delete Public Holiday";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        string koneksi = ConnectionDB.strProvider;
+                        myConn = new MySqlConnection(koneksi); var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_masterholiday WHERE date = '" + dateslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -472,21 +477,21 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Public Holiday List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         refresh();
                     }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Public Holiday", "Public Holiday List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
-                    }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected Public Holiday", "Public Holiday List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void tbSearch_TextChanged(object sender, EventArgs e)

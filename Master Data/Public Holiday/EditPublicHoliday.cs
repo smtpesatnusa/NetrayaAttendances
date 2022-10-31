@@ -10,7 +10,7 @@ namespace SMTAttendance
     {
         Helper help = new Helper();
         string idUser, dept;
-
+        MySqlConnection myConn;
         public EditPublicHoliday()
         {
             InitializeComponent();
@@ -32,15 +32,16 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string name = tbName.Text;
                     string date = dateTimePickerDate.Text;
 
                     string cekdata = "SELECT * FROM tbl_masterholiday WHERE date = '" + date + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdata, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdata, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -53,7 +54,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_masterholiday (name, date, createDate, createBy) " +
                                 "VALUES ('" + name + "', '" + date + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -65,7 +66,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Public Holiday Successfully Added", "Add Public Holiday", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.Close();
                         }
@@ -73,12 +74,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
-            finally
+                finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

@@ -10,6 +10,7 @@ namespace SMTAttendance
     {
         readonly Helper help = new Helper();
         string idUser, dept;
+        MySqlConnection myConn;
 
         public LeaveApproval()
         {
@@ -30,7 +31,8 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT id, (SELECT b.name FROM tbl_employee b WHERE b.badgeID= a.badgeID) AS employee, " +
@@ -38,7 +40,7 @@ namespace SMTAttendance
                     " DATE_FORMAT(startDate, '%a, %Y-%m-%e') AS startDate, DATE_FORMAT(endDate, '%a, %Y-%m-%e') AS endDate," +
                     " (SELECT d.name FROM tbl_masterstatus d WHERE d.id= a.status) AS status FROM tbl_leave a WHERE STATUS = '1' AND confirmBy = '" + idUser+"' ORDER BY id DESC";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -67,18 +69,19 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
         private void LoadDataApprove()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT (SELECT b.name FROM tbl_employee b WHERE b.badgeID= a.badgeID) AS employee, " +
@@ -86,7 +89,7 @@ namespace SMTAttendance
                     " DATE_FORMAT(startDate, '%a, %Y-%m-%e') AS startDate, DATE_FORMAT(endDate, '%a, %Y-%m-%e') AS endDate" +
                     " FROM tbl_leave a WHERE STATUS = '2' AND confirmBy = '" + idUser + "' ORDER BY id DESC";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -97,18 +100,19 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
         private void LoadDataDecline()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT (SELECT b.name FROM tbl_employee b WHERE b.badgeID= a.badgeID) AS employee, " +
@@ -116,7 +120,7 @@ namespace SMTAttendance
                     " DATE_FORMAT(startDate, '%a, %Y-%m-%e') AS startDate, DATE_FORMAT(endDate, '%a, %Y-%m-%e') AS endDate" +
                     " FROM tbl_leave a WHERE STATUS = '3' AND confirmBy = '" + idUser + "' ORDER BY id DESC";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -127,12 +131,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -196,7 +200,8 @@ namespace SMTAttendance
             i = dataGridViewLeaveList.SelectedCells[0].RowIndex;
             string idLeave = dataGridViewLeaveList.Rows[i].Cells[0].Value.ToString();
             string employeeslctd = dataGridViewLeaveList.Rows[i].Cells[1].Value.ToString();
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
             if (e.ColumnIndex == 6)
             {
@@ -210,10 +215,10 @@ namespace SMTAttendance
                 {
                     try
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string queryApprove = "UPDATE tbl_leave SET STATUS = '2' WHERE id = '"+idLeave+"'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { queryApprove };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -224,18 +229,18 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Leave Approved successfully", "Leave Approval", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         refresh();
                     }
                     catch (Exception ex)
                     {
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Unable to approve selected leave request", "Leave Approval", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
-                        connectionDB.connection.Dispose();
+                        myConn.Dispose();
                     }
                 }
             }
@@ -251,10 +256,10 @@ namespace SMTAttendance
                 {
                     try
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string queryDecline = "UPDATE tbl_leave SET STATUS = '3' WHERE id = '" + idLeave + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { queryDecline };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -265,18 +270,18 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Leave Declined successfully", "Leave Decline", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         refresh();
                     }
                     catch (Exception ex)
                     {
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Unable to decline selected leave request", "Leave Decline", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
-                        connectionDB.connection.Dispose();
+                        myConn.Dispose();
                     }
                 }
             }

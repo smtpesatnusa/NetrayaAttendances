@@ -10,6 +10,7 @@ namespace SMTAttendance
     {
         readonly Helper help = new Helper();
         string idUser, dept;
+        MySqlConnection myConn;
 
         public Devicelist()
         {
@@ -92,11 +93,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT workarea, dept, ipAddress, port, indicator, isActive FROM tbl_masterdevice ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -123,12 +125,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -148,10 +150,11 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string workArea = cmbWorkArea.Text;
                     string department = cmbDepartment.Text;
                     string ipAddress = tbipAddress.Text;
@@ -170,7 +173,7 @@ namespace SMTAttendance
                     }
 
                     string cek = "SELECT * FROM tbl_masterdevice WHERE ipAddress = '" + ipAddress + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -186,7 +189,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_masterdevice (workarea, dept, ipAddress, port,  indicator, isActive, createDate, createBy) VALUES " +
                                 "('" + workArea + "', '" + department + "', '" + ipAddress + "', '" + port + "', '" + indicator + "', '" + isCheck + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -198,7 +201,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Device Successfully Added", "Add Device", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             refresh();
                             cmbWorkArea.Focus();
@@ -207,12 +210,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -271,7 +274,6 @@ namespace SMTAttendance
             {
                 EditDevice editDevice = new EditDevice();
                 editDevice.usernameLbl.Text = toolStripUsername.Text;
-                editDevice.tbDeviceName.Text = nameslctd;
                 editDevice.cmbDepartment.SelectedItem = deptslctd;
                 editDevice.tbipAddress.Text = ipslctd;
                 editDevice.cmbInout.SelectedItem = indicslctd;
@@ -287,13 +289,14 @@ namespace SMTAttendance
 
                 if (result == DialogResult.Yes)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
+                    string koneksi = ConnectionDB.strProvider;
+                    myConn = new MySqlConnection(koneksi);
                     try
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_masterdevice WHERE ipAddress = '" + ipslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -304,23 +307,19 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
-                        Devicelist devicelist = new Devicelist();
-                        devicelist.toolStripUsername.Text = toolStripUsername.Text;
-                        devicelist.userdetail.Text = userdetail.Text;
-                        devicelist.Show();
-                        this.Hide();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Device List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        refresh();
                     }
                     catch (Exception ex)
                     {
-                        connectionDB.connection.Close();
-                        MessageBox.Show(ex.Message);
+                        myConn.Close();
+                        //MessageBox.Show(ex.Message);
                         //MessageBox.Show("Unable to remove selected Device", "Device List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {
-                        connectionDB.connection.Dispose();
+                        myConn.Dispose();
                     }
                 }
             }

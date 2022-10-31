@@ -10,6 +10,7 @@ namespace SMTAttendance
         readonly Helper help = new Helper();
         string idUser, dept;
 
+        MySqlConnection myConn;
         public AddSchedule()
         {
             InitializeComponent();
@@ -103,10 +104,11 @@ namespace SMTAttendance
 
         private void submitBtn_Click(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
-                var cmd = new MySqlCommand("", connectionDB.connection);
+                var cmd = new MySqlCommand("", myConn);
                 string dept = cmbDepartment.Text;
                 string lineCode = cmbLineCode.Name;
                 string from = dateTimePickerFrom.Text;
@@ -119,7 +121,7 @@ namespace SMTAttendance
                 string createDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 string createBy = idUser;
 
-                connectionDB.connection.Open();
+                myConn.Open();
                 //Buka koneksi
 
                 for (int i = 0; i < dataGridViewEmployee.Rows.Count; i++)
@@ -150,19 +152,18 @@ namespace SMTAttendance
                     }                    
                 }
 
-                connectionDB.connection.Close();
+                myConn.Close();
                 MessageBox.Show(this, "Schedule Successfully Added", "Add Schedule", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.Close();
-
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message.ToString());
+                myConn.Close();
+                //MessageBox.Show(ex.Message.ToString());
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 

@@ -9,8 +9,7 @@ namespace SMTAttendance
     public partial class ApplyLeave : MaterialForm
     {
         Helper help = new Helper();
-        ConnectionDB connectionDB = new ConnectionDB();
-
+        MySqlConnection myConn;
         string idUser, dept;
 
         public ApplyLeave()
@@ -52,9 +51,11 @@ namespace SMTAttendance
             }
             else
             {
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     //get employee id
                     var employee = cmbEmployee.Text.Split('|');
@@ -71,7 +72,7 @@ namespace SMTAttendance
                     string status = "1";
                     
                     string cek = "SELECT* FROM tbl_leave WHERE badgeID = '"+employeeId+ "' AND(startdate = '" + start + "' OR endDate = '" + end + "')";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -86,7 +87,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_leave (badgeID, leavetype, startdate, enddate, descr, confirmBy, status, createDate, createBy) " +
                                 "VALUES ('" + employeeId + "', '" + type + "','" + start + "','" + end + "','" + desc + "','" + confirmId + "','" + status + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -98,7 +99,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Leave Successfully Submit", "Apply Leave", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.Close();
                         }
@@ -106,8 +107,8 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
             }
         }

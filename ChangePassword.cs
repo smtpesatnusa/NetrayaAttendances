@@ -10,6 +10,7 @@ namespace SMTAttendance
     {
         Helper help = new Helper();
         string idUser;
+        MySqlConnection myConn;
 
         public ChangePassword()
         {
@@ -25,28 +26,29 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string crnpass = tbcrnpass.Text;
                     crnpass = help.encryption(crnpass);
                     string newpass = tbnewpass.Text;
                     newpass = help.encryption(newpass);
                     string vrypass = tbvrypass.Text;
 
-                    connectionDB.connection.Open();
+                    myConn.Open();
                     //Buka koneksi
                     string cekcrnpass= "SELECT * FROM tbl_user WHERE username = '" + idUser + "' and pass ='"+ crnpass +"'";
-                    using (MySqlDataAdapter dscmd = new MySqlDataAdapter(cekcrnpass, connectionDB.connection))
+                    using (MySqlDataAdapter dscmd = new MySqlDataAdapter(cekcrnpass, myConn))
                     {
                         DataSet ds = new DataSet();
                         dscmd.Fill(ds);
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         // cek jika username dan pass nya benar
                         if (ds.Tables[0].Rows.Count > 0)
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string querychangepass = "update tbl_user set pass='" + newpass + "' where username='" + idUser + "'";
 
                             string[] allQuery = { querychangepass };
@@ -57,7 +59,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MaterialDialog materialDialog = new MaterialDialog(this, "Change Password", "Password Successfully Changed, Please login again", "OK");
                             DialogResult result = materialDialog.ShowDialog(this);
                             this.Close();
@@ -67,18 +69,18 @@ namespace SMTAttendance
                         {
                             MaterialDialog materialDialog = new MaterialDialog(this, "Change Password", "Current Password wrong", "OK");
                             DialogResult result = materialDialog.ShowDialog(this);
-                            connectionDB.connection.Close();
+                            myConn.Close();
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

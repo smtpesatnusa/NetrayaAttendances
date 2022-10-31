@@ -11,7 +11,7 @@ namespace SMTAttendance
     {
         readonly LoadForm lf = new LoadForm();
         readonly Helper help = new Helper();
-        readonly ConnectionDB connectionDB = new ConnectionDB();
+        MySqlConnection myConn;
         private DataSet ds;
         private DataTable dtSource;
         private int PageCount;
@@ -131,9 +131,12 @@ namespace SMTAttendance
 
         private void LoadDS(string SQL)
         {
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
-                MySqlDataAdapter da = new MySqlDataAdapter(SQL, connectionDB.connection);
+                MySqlDataAdapter da = new MySqlDataAdapter(SQL, myConn);
                 ds = new DataSet();
 
                 // Fill the DataSet.
@@ -144,7 +147,7 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -183,13 +186,16 @@ namespace SMTAttendance
 
         private void loadData()
         {
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 DateTime dt1 = dtBegin.Value;
                 DateTime dt2 = dtEnd.Value;
                 dt2 = dt2.AddDays(1).AddSeconds(-1);
 
-                connectionDB.connection.Open();
+                myConn.Open();
 
                 if (dept == "All")
                 {
@@ -210,13 +216,13 @@ namespace SMTAttendance
                 string record = dtSource.Rows.Count.ToString();
 
                 CloseProgress();
-                connectionDB.connection.Close();
+                myConn.Close();
                 totalLbl.Text = dtSource.Rows.Count.ToString();
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
         }
 
@@ -413,7 +419,7 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
             }
         }
     }

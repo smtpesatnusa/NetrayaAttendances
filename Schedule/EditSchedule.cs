@@ -12,6 +12,8 @@ namespace SMTAttendance
         string idUser, dept;
         string dateSchdule;
 
+        MySqlConnection myConn;
+
         public EditSchedule()
         {
             InitializeComponent();
@@ -48,7 +50,8 @@ namespace SMTAttendance
 
         private void submitBtn_Click(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 if (tbBadgeId.Text == "" ||  cmbShift.Text == "")
@@ -57,7 +60,7 @@ namespace SMTAttendance
                 }
                 else
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     string createDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     string createBy = idUser;
@@ -116,7 +119,7 @@ namespace SMTAttendance
                     // select shift = - insert schedule
                     if (tbSchedule.Text == "-")
                     {
-                        connectionDB.connection.Open();
+                        myConn.Open();
                         string queryUpdate = "INSERT INTO tbl_attendance (rfidNo, DATE, EmplID, DayType, ShiftId, ScheduleIn, ScheduleOut) VALUES " +
                             "('-', '" + dateSchdule + "', (SELECT id FROM tbl_employee WHERE badgeID = '" + badgeId + "'),'WorkDay', '" + shiftID + "', '" + scheduleIn + "', '" + scheduleOut + "')";
 
@@ -125,13 +128,13 @@ namespace SMTAttendance
                         cmd.ExecuteNonQuery();
                         //Jalankan perintah / query dalam CommandText pada database
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show(this, "Schedule Successfully Updated", "Edit Schedule", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Close();
                     }
                     else
                     {
-                        connectionDB.connection.Open();
+                        myConn.Open();
                         string queryUpdate = " UPDATE tbl_attendance SET shiftId = '" + shiftID + "', ScheduleIn = '" + scheduleIn + "', ScheduleOut = '" + scheduleOut + "', intime = Null, outtime = Null  " +
                             ", BreakOut = Null, BreakIn = Null, TotalBreak = 0, LateIn = 0, EarlyOut = 0 WHERE EmplId = (SELECT id FROM tbl_employee WHERE badgeID = '" + badgeId + "') AND DATE = '" + dateSchdule + "'";
 
@@ -140,7 +143,7 @@ namespace SMTAttendance
                         cmd.ExecuteNonQuery();
                         //Jalankan perintah / query dalam CommandText pada database
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show(this, "Schedule Successfully Updated", "Edit Schedule", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         this.Close();
                     }
@@ -148,12 +151,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message.ToString());
+                myConn.Close();
+                //MessageBox.Show(ex.Message.ToString());
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
     }

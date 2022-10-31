@@ -13,6 +13,8 @@ namespace SMTAttendance
         string idUser, dept;
         string query;
 
+        MySqlConnection myConn;
+
         public Userlist()
         {
             InitializeComponent();
@@ -65,7 +67,9 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 //get cmb dept based on dept user
@@ -78,7 +82,7 @@ namespace SMTAttendance
                     query = "SELECT username, name,role, dept from tbl_user where dept = '" + dept + "' ORDER BY id DESC";
                 }
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -96,12 +100,11 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
         private void Modelmasterlist_FormClosing(object sender, FormClosingEventArgs e)
@@ -169,27 +172,26 @@ namespace SMTAttendance
 
         private void dataGridViewUserList_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             int i;
             i = dataGridViewUserList.SelectedCells[0].RowIndex;
             string poslctd = dataGridViewUserList.Rows[i].Cells[0].Value.ToString();
 
-            if (e.ColumnIndex == 4)
+            try
             {
-                string message = "Do you want to delete this User with ID " + poslctd + "?";
-                string title = "Delete User";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 4)
                 {
-                    try
+                    string message = "Do you want to delete this User with ID " + poslctd + "?";
+                    string title = "Delete User";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydeletePO = "DELETE FROM tbl_user WHERE username = '" + poslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydeletePO };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -200,24 +202,23 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         clearInput();
                         MessageBox.Show("Record Deleted successfully", "User List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         refresh();
                     }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected user", "User List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
-                    }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected user", "User List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void tbbadgeid_TextChanged(object sender, EventArgs e)
@@ -260,17 +261,18 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string userid = tbbadgeid.Text;
                     string username = tbname.Text;
                     string userrole = tbuserrole.Text;
                     string password = help.encryption("Passw0rd");
 
                     string cekmodel = "SELECT * FROM tbl_user WHERE username = '" + userid + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekmodel, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekmodel, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -284,7 +286,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAddmodel = "INSERT INTO tbl_user (username, name, pass, role, dept, createDate, createBy) " +
                                 "VALUES ('" + userid + "', '" + username + "','" + password + "','" + cmbLevel.Text + "','" + cmbDepartment.Text + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -296,7 +298,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "User Successfully Added", "Add Model", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             clearInput();
                             refresh();
@@ -306,12 +308,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

@@ -1,12 +1,10 @@
 ﻿using MaterialSkin.Controls;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace SMTAttendance

@@ -10,6 +10,8 @@ namespace SMTAttendance
         readonly Helper help = new Helper();
         string intime, outtime;
 
+        MySqlConnection myConn;
+
         public DetailPosition()
         {
             InitializeComponent();
@@ -55,71 +57,83 @@ namespace SMTAttendance
 
         private void DetailPosition_Load(object sender, EventArgs e)
         {
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             string badge = tbBadge.Text;
             var date = tbDate.Text;
-            ConnectionDB connectionDB = new ConnectionDB();
-
-            //// select intime, outtime selected badge
-            //string querytime = "SELECT scheduleIn, outtime FROM tbl_attendance a, tbl_employee b WHERE a.Emplid = b.id AND b.badgeID = '" + badge+"'AND a.date = '"+date+"'";
-            //using (MySqlDataAdapter adpt = new MySqlDataAdapter(querytime, connectionDB.connection))
-            //{
-            //    DataTable dset = new DataTable();
-            //    adpt.Fill(dset);
-            //    if (dset.Rows.Count > 0)
-            //    {
-            //        intime = dset.Rows[0]["scheduleIn"].ToString();
-            //        outtime = dset.Rows[0]["outtime"].ToString();
-            //        intime = DateTime.Parse(intime).AddHours(-2).ToString("yyyy-MM-dd HH:mm:ss"); ;
-            //        outtime = DateTime.Parse(outtime).AddHours(2).ToString("yyyy-MM-dd HH:mm:ss"); ;
-            //    }
-            //}
-
-            // detail inout
-            string detail = "SELECT a.ipDevice, a.indicator,  DATE_FORMAT(a.timelog, '%H:%i')AS TIME FROM tbl_log a, tbl_employee b " +
-                "WHERE a.rfidNo = b.rfidNo AND b.badgeID = '" + badge + "' AND(a.timelog BETWEEN '" + date + " 00:00:00' AND '" + date + " 23:59:00') " +
-                "ORDER BY a.id DESC";
-
-            help.fill_dgv(detail, dataGridViewPositionList);
-
-            // duration break
-            string query = "SELECT SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + date + "' AND b.badgeid = '" + badge + "' GROUP BY b.badgeId, b.name";
-            using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+            try
             {
-                DataTable dset = new DataTable();
-                adpt.Fill(dset);
-                if (dset.Rows.Count > 0)
+                //// select intime, outtime selected badge
+                //string querytime = "SELECT scheduleIn, outtime FROM tbl_attendance a, tbl_employee b WHERE a.Emplid = b.id AND b.badgeID = '" + badge+"'AND a.date = '"+date+"'";
+                //using (MySqlDataAdapter adpt = new MySqlDataAdapter(querytime, connectionDB.connection))
+                //{
+                //    DataTable dset = new DataTable();
+                //    adpt.Fill(dset);
+                //    if (dset.Rows.Count > 0)
+                //    {
+                //        intime = dset.Rows[0]["scheduleIn"].ToString();
+                //        outtime = dset.Rows[0]["outtime"].ToString();
+                //        intime = DateTime.Parse(intime).AddHours(-2).ToString("yyyy-MM-dd HH:mm:ss"); ;
+                //        outtime = DateTime.Parse(outtime).AddHours(2).ToString("yyyy-MM-dd HH:mm:ss"); ;
+                //    }
+                //}
+
+                // detail inout
+                string detail = "SELECT a.ipDevice, a.indicator,  DATE_FORMAT(a.timelog, '%H:%i')AS TIME FROM tbl_log a, tbl_employee b " +
+                    "WHERE a.rfidNo = b.rfidNo AND b.badgeID = '" + badge + "' AND(a.timelog BETWEEN '" + date + " 00:00:00' AND '" + date + " 23:59:00') " +
+                    "ORDER BY a.id DESC";
+
+                help.fill_dgv(detail, dataGridViewPositionList);
+
+                // duration break
+                string query = "SELECT SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + date + "' AND b.badgeid = '" + badge + "' GROUP BY b.badgeId, b.name";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
-                    string totalBreak = dset.Rows[0]["totalBreak"].ToString();
-                    tbTotalBreak.Text = totalBreak + " Minute";
+                    DataTable dset = new DataTable();
+                    adpt.Fill(dset);
+                    if (dset.Rows.Count > 0)
+                    {
+                        string totalBreak = dset.Rows[0]["totalBreak"].ToString();
+                        tbTotalBreak.Text = totalBreak + " Minute";
+                    }
+                }
+
+                // detail break
+                string querybreak = "SELECT a.timeOut, a.timeIn, a.duration FROM tbl_durationbreak a, tbl_employee b " +
+                    "WHERE a.date = '" + date + "' AND b.badgeId = '" + badge + "' AND a.Emplid = b.id ORDER BY a.id DESC";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(querybreak, myConn))
+                {
+                    DataSet dset = new DataSet();
+                    adpt.Fill(dset);
+                    if (dset.Tables[0].Rows.Count > 0)
+                    {
+                        dataGridViewBreakList.DataSource = dset.Tables[0];
+                    }
+                }
+
+                // last position employee
+                string queryposition = "SELECT CONCAT(a.ipDevice ,' (', a.indicator ,')' ) AS positions FROM tbl_log a, tbl_employee b WHERE a.rfidNo = b.rfidNo AND " +
+                    "b.badgeID = '" + badge + "' AND(a.timelog BETWEEN '" + date + " 00:00:00' AND '" + date + " 23:59:59') ORDER BY a.timelog DESC LIMIT 1";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryposition, myConn))
+                {
+                    DataTable dset = new DataTable();
+                    adpt.Fill(dset);
+                    if (dset.Rows.Count > 0)
+                    {
+                        string lastPosition = dset.Rows[0]["positions"].ToString();
+                        tbLastPosition.Text = lastPosition;
+                    }
                 }
             }
-
-            // detail break
-            string querybreak = "SELECT a.timeOut, a.timeIn, a.duration FROM tbl_durationbreak a, tbl_employee b " +
-                "WHERE a.date = '" + date + "' AND b.badgeId = '" + badge + "' AND a.Emplid = b.id ORDER BY a.id DESC";
-            using (MySqlDataAdapter adpt = new MySqlDataAdapter(querybreak, connectionDB.connection))
+            catch (Exception ex)
             {
-                DataSet dset = new DataSet();
-                adpt.Fill(dset);
-                if (dset.Tables[0].Rows.Count > 0)
-                {
-                    dataGridViewBreakList.DataSource = dset.Tables[0];
-                }
+                //MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // last position employee
-            string queryposition = "SELECT CONCAT(a.ipDevice ,' (', a.indicator ,')' ) AS positions FROM tbl_log a, tbl_employee b WHERE a.rfidNo = b.rfidNo AND " +
-                "b.badgeID = '" + badge + "' AND(a.timelog BETWEEN '" + date + " 00:00:00' AND '" + date + " 23:59:59') ORDER BY a.timelog DESC LIMIT 1";
-            using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryposition, connectionDB.connection))
+            finally
             {
-                DataTable dset = new DataTable();
-                adpt.Fill(dset);
-                if (dset.Rows.Count > 0)
-                {
-                    string lastPosition = dset.Rows[0]["positions"].ToString();
-                    tbLastPosition.Text = lastPosition;
-                }
-            }
+                myConn.Dispose();
+            }            
         }
 
         private void dataGridViewBreakList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

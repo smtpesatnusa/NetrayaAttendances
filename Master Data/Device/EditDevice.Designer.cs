@@ -39,9 +39,11 @@ namespace SMTAttendance
             this.label2 = new System.Windows.Forms.Label();
             this.cmbDepartment = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.tbDeviceName = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.usernameLbl = new System.Windows.Forms.Label();
+            this.cmbWorkArea = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbPort = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cmbInout
@@ -56,7 +58,7 @@ namespace SMTAttendance
             "In",
             "Out",
             "In/Out"});
-            this.cmbInout.Location = new System.Drawing.Point(79, 323);
+            this.cmbInout.Location = new System.Drawing.Point(79, 397);
             this.cmbInout.Margin = new System.Windows.Forms.Padding(4);
             this.cmbInout.Name = "cmbInout";
             this.cmbInout.Size = new System.Drawing.Size(277, 27);
@@ -67,7 +69,7 @@ namespace SMTAttendance
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Open Sans", 8.25F);
-            this.label1.Location = new System.Drawing.Point(75, 292);
+            this.label1.Location = new System.Drawing.Point(75, 366);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(52, 19);
@@ -83,7 +85,7 @@ namespace SMTAttendance
             this.saveBtn.Depth = 0;
             this.saveBtn.HighEmphasis = true;
             this.saveBtn.Icon = null;
-            this.saveBtn.Location = new System.Drawing.Point(155, 392);
+            this.saveBtn.Location = new System.Drawing.Point(155, 492);
             this.saveBtn.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
             this.saveBtn.MouseState = MaterialSkin.MouseState.HOVER;
             this.saveBtn.Name = "saveBtn";
@@ -94,13 +96,14 @@ namespace SMTAttendance
             this.saveBtn.Type = MaterialSkin.Controls.MaterialButton.MaterialButtonType.Outlined;
             this.saveBtn.UseAccentColor = false;
             this.saveBtn.UseVisualStyleBackColor = true;
+            this.saveBtn.Click += new System.EventHandler(this.saveBtn_Click);
             // 
             // isActiveCheckBox
             // 
             this.isActiveCheckBox.AutoSize = true;
             this.isActiveCheckBox.Checked = true;
             this.isActiveCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.isActiveCheckBox.Location = new System.Drawing.Point(79, 359);
+            this.isActiveCheckBox.Location = new System.Drawing.Point(79, 433);
             this.isActiveCheckBox.Name = "isActiveCheckBox";
             this.isActiveCheckBox.Size = new System.Drawing.Size(86, 23);
             this.isActiveCheckBox.TabIndex = 251;
@@ -157,36 +160,12 @@ namespace SMTAttendance
             this.label7.TabIndex = 253;
             this.label7.Text = "Department";
             // 
-            // tbDeviceName
-            // 
-            this.tbDeviceName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbDeviceName.Font = new System.Drawing.Font("Open Sans", 8.25F);
-            this.tbDeviceName.Location = new System.Drawing.Point(79, 108);
-            this.tbDeviceName.Margin = new System.Windows.Forms.Padding(4);
-            this.tbDeviceName.MaxLength = 30;
-            this.tbDeviceName.Name = "tbDeviceName";
-            this.tbDeviceName.Size = new System.Drawing.Size(277, 26);
-            this.tbDeviceName.TabIndex = 248;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.BackColor = System.Drawing.Color.Transparent;
-            this.label5.Font = new System.Drawing.Font("Open Sans", 8.25F);
-            this.label5.Location = new System.Drawing.Point(75, 79);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(49, 19);
-            this.label5.TabIndex = 252;
-            this.label5.Text = "Name";
-            // 
             // usernameLbl
             // 
             this.usernameLbl.AutoSize = true;
             this.usernameLbl.BackColor = System.Drawing.Color.Transparent;
             this.usernameLbl.Font = new System.Drawing.Font("Open Sans", 8.25F);
-            this.usernameLbl.Location = new System.Drawing.Point(24, 405);
+            this.usernameLbl.Location = new System.Drawing.Point(24, 470);
             this.usernameLbl.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.usernameLbl.Name = "usernameLbl";
             this.usernameLbl.Size = new System.Drawing.Size(77, 19);
@@ -194,11 +173,65 @@ namespace SMTAttendance
             this.usernameLbl.Text = "username";
             this.usernameLbl.Visible = false;
             // 
+            // cmbWorkArea
+            // 
+            this.cmbWorkArea.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbWorkArea.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cmbWorkArea.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cmbWorkArea.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbWorkArea.FormattingEnabled = true;
+            this.cmbWorkArea.Location = new System.Drawing.Point(79, 104);
+            this.cmbWorkArea.Margin = new System.Windows.Forms.Padding(4);
+            this.cmbWorkArea.Name = "cmbWorkArea";
+            this.cmbWorkArea.Size = new System.Drawing.Size(277, 27);
+            this.cmbWorkArea.TabIndex = 261;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.Transparent;
+            this.label3.Font = new System.Drawing.Font("Open Sans", 8.25F);
+            this.label3.Location = new System.Drawing.Point(75, 77);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(78, 19);
+            this.label3.TabIndex = 260;
+            this.label3.Text = "Work Area";
+            // 
+            // tbPort
+            // 
+            this.tbPort.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPort.Font = new System.Drawing.Font("Open Sans", 8.25F);
+            this.tbPort.Location = new System.Drawing.Point(79, 327);
+            this.tbPort.Margin = new System.Windows.Forms.Padding(4);
+            this.tbPort.MaxLength = 30;
+            this.tbPort.Name = "tbPort";
+            this.tbPort.Size = new System.Drawing.Size(277, 26);
+            this.tbPort.TabIndex = 262;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.BackColor = System.Drawing.Color.Transparent;
+            this.label4.Font = new System.Drawing.Font("Open Sans", 8.25F);
+            this.label4.Location = new System.Drawing.Point(75, 295);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 19);
+            this.label4.TabIndex = 263;
+            this.label4.Text = "Port";
+            // 
             // EditDevice
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(437, 470);
+            this.ClientSize = new System.Drawing.Size(437, 570);
+            this.Controls.Add(this.tbPort);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.cmbWorkArea);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.usernameLbl);
             this.Controls.Add(this.cmbInout);
             this.Controls.Add(this.label1);
@@ -208,8 +241,6 @@ namespace SMTAttendance
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cmbDepartment);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.tbDeviceName);
-            this.Controls.Add(this.label5);
             this.Font = new System.Drawing.Font("Open Sans", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -233,10 +264,12 @@ namespace SMTAttendance
         public System.Windows.Forms.TextBox tbipAddress;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label7;
-        public System.Windows.Forms.TextBox tbDeviceName;
-        private System.Windows.Forms.Label label5;
         public System.Windows.Forms.Label usernameLbl;
         public System.Windows.Forms.ComboBox cmbInout;
         public System.Windows.Forms.ComboBox cmbDepartment;
+        private System.Windows.Forms.ComboBox cmbWorkArea;
+        private System.Windows.Forms.Label label3;
+        public System.Windows.Forms.TextBox tbPort;
+        private System.Windows.Forms.Label label4;
     }
 }

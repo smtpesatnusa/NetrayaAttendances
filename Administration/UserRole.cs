@@ -16,6 +16,7 @@ namespace SMTAttendance
         string selectedItems;
 
         string sqluserlist;
+        MySqlConnection myConn;
         public UserRole()
         {
             InitializeComponent();
@@ -25,7 +26,6 @@ namespace SMTAttendance
         {
             help.dateTimeNow(dateTimeNow);
         }
-
 
         private void Userlist_Load(object sender, EventArgs e)
         {
@@ -54,7 +54,6 @@ namespace SMTAttendance
 
             // expand all child in treeview
             treeViewMenu.ExpandAll();
-
             
             //get data based on dept user
             if (dept == "All")
@@ -125,7 +124,6 @@ namespace SMTAttendance
 
         private void updateBtn_Click(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {
                 var badge = listBoxUser.Text.Trim().Split('|');
@@ -142,8 +140,8 @@ namespace SMTAttendance
                     // get selected treeview
                     SelectedMenu();
 
-                    var cmd = new MySqlCommand("", connectionDB.connection);
-                    connectionDB.connection.Open();
+                    var cmd = new MySqlCommand("", myConn);
+                    myConn.Open();
                     //Buka koneksi
 
                     // delete role 
@@ -165,19 +163,19 @@ namespace SMTAttendance
                         cmd.ExecuteNonQuery();
                     }
 
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     //Tutup koneksi
                     MessageBox.Show("User role successfully updated", "Update User Role", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message.ToString());
+                myConn.Close();
+                //MessageBox.Show(ex.Message.ToString());
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -192,7 +190,8 @@ namespace SMTAttendance
 
         private void listBoxUser_SelectedValueChanged(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 var badge = listBoxUser.Text.Trim().Split('|');
@@ -205,7 +204,7 @@ namespace SMTAttendance
                 {
                     string query = "SELECT a.roleID, b.parentId FROM tbl_userrole a, tbl_menu b WHERE " +
                         "a.roleID = b.nodeID AND a.userId = '" + badgeId + "' ORDER BY b.parentId, a.roleID";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                     {
                         DataTable dset = new DataTable();
                         adpt.Fill(dset);
@@ -233,11 +232,11 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message.ToString());
+                //MessageBox.Show(ex.Message.ToString());
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 

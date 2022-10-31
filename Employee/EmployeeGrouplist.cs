@@ -15,6 +15,8 @@ namespace SMTAttendance
         string idgroup;
         string idEmpGroup;
 
+        MySqlConnection myConn;
+
         public EmployeeGrouplist()
         {
             InitializeComponent();
@@ -74,7 +76,9 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 // remove data in datagridview result
@@ -87,7 +91,7 @@ namespace SMTAttendance
                 }
 
                 string query = "SELECT NAME, section, dept, linecode FROM tbl_employeegroup where dept = '" + cmbFilter.Text + "' ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -114,12 +118,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -146,10 +150,12 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
+
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     // get selected employee
                     SelectedEmployee();
@@ -160,7 +166,7 @@ namespace SMTAttendance
                     string lineCode = cmbLineCode.Text;
 
                     string cek = "SELECT * FROM tbl_employeegroup WHERE name = '" + name + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataTable dt = new DataTable();
                         adpt.Fill(dt);
@@ -172,7 +178,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
 
                             //insert group data
                             string queryAdd = "INSERT INTO tbl_employeegroup (name, section, dept, linecode, createDate, createBy) VALUES " +
@@ -211,7 +217,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                             }
 
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Employee Group Successfully Added", "Add Employee Group", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             refresh();
                         }
@@ -219,12 +225,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -308,24 +314,26 @@ namespace SMTAttendance
             string section = dataGridViewEmployeeGroupList.Rows[i].Cells[1].Value.ToString();
             string dept = dataGridViewEmployeeGroupList.Rows[i].Cells[2].Value.ToString();
             string linecode = dataGridViewEmployeeGroupList.Rows[i].Cells[3].Value.ToString();
-            ConnectionDB connectionDB = new ConnectionDB();
 
-            if (e.ColumnIndex == 4)
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
+            try
             {
-                string message = "Do you want to delete this Employee Group " + slctd + "?";
-                string title = "Delete Employee Group";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 4)
                 {
-                    try
+                    string message = "Do you want to delete this Employee Group " + slctd + "?";
+                    string title = "Delete Employee Group";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_employeegroup WHERE name = '" + slctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -336,7 +344,7 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         EmployeeGrouplist employeeGrouplist = new EmployeeGrouplist();
                         employeeGrouplist.toolStripUsername.Text = toolStripUsername.Text;
                         employeeGrouplist.userdetail.Text = userdetail.Text;
@@ -344,42 +352,42 @@ namespace SMTAttendance
                         this.Hide();
                         MessageBox.Show("Record Deleted successfully", "Employee Group List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected employee group that already have schedule, delete schedule first", "Employee Group List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        MessageBox.Show(ex.Message.ToString());
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
-                    }
                 }
-            }
-            if (e.ColumnIndex == 5)
-            {
-                string cekId = "SELECT id FROM tbl_employeegroup WHERE NAME = '" + slctd + "' AND section = '" + section + "' AND dept ='" + dept + "' AND linecode ='" + linecode + "'";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekId, connectionDB.connection))
+                if (e.ColumnIndex == 5)
                 {
-                    DataTable dt = new DataTable();
-                    adpt.Fill(dt);
-
-                    // cek jika modelno tsb sudah di upload
-                    if (dt.Rows.Count > 0)
+                    string cekId = "SELECT id FROM tbl_employeegroup WHERE NAME = '" + slctd + "' AND section = '" + section + "' AND dept ='" + dept + "' AND linecode ='" + linecode + "'";
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekId, myConn))
                     {
-                        //get id that already insert
-                        idEmpGroup = dt.Rows[0]["id"].ToString();
-                    }
-                }
+                        DataTable dt = new DataTable();
+                        adpt.Fill(dt);
 
-                DetailEmployeeGroup detailEmployeeGroup = new DetailEmployeeGroup();
-                detailEmployeeGroup.idLabel.Text = idEmpGroup;
-                detailEmployeeGroup.tbName.Text = slctd;
-                detailEmployeeGroup.tbSection.Text = section;
-                detailEmployeeGroup.tbDept.Text = dept;
-                detailEmployeeGroup.tbLineCode.Text = linecode;
-                detailEmployeeGroup.ShowDialog();
+                        // cek jika modelno tsb sudah di upload
+                        if (dt.Rows.Count > 0)
+                        {
+                            //get id that already insert
+                            idEmpGroup = dt.Rows[0]["id"].ToString();
+                        }
+                    }
+
+                    DetailEmployeeGroup detailEmployeeGroup = new DetailEmployeeGroup();
+                    detailEmployeeGroup.idLabel.Text = idEmpGroup;
+                    detailEmployeeGroup.tbName.Text = slctd;
+                    detailEmployeeGroup.tbSection.Text = section;
+                    detailEmployeeGroup.tbDept.Text = dept;
+                    detailEmployeeGroup.tbLineCode.Text = linecode;
+                    detailEmployeeGroup.ShowDialog();
+                }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                //MessageBox.Show("Unable to remove selected employee group that already have schedule, delete schedule first", "Employee Group List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message.ToString());
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void cmbDepartment_SelectedIndexChanged(object sender, EventArgs e)

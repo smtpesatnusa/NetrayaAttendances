@@ -12,6 +12,7 @@ namespace SMTAttendance
 
         string idUser, dept;
         string query;
+        MySqlConnection myConn;
 
         public LineCodelist()
         {
@@ -61,7 +62,8 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 //get line code based on dept user
@@ -74,7 +76,7 @@ namespace SMTAttendance
                     query = "SELECT name,description, dept from tbl_masterlinecode where dept = '" + dept + "' ORDER BY id DESC";
                 }
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -93,12 +95,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -117,16 +119,17 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string lineCode = tbLineCode.Text;
                     string desc = tbDesc.Text;
                     string dept = cmbDepartment.Text;
 
                     string cek = "SELECT * FROM tbl_masterlinecode WHERE name = '" + lineCode + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -141,7 +144,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_masterlinecode (name, description, dept, createDate, createBy) VALUES " +
                                 "('" + lineCode + "', '" + desc + "', '" + dept + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -153,7 +156,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Line Code Successfully Added", "Add Line Code", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             tbLineCode.Clear();
                             tbDesc.Clear();
@@ -164,12 +167,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -246,23 +249,25 @@ namespace SMTAttendance
             i = dataGridViewLineCodeList.SelectedCells[0].RowIndex;
             string slctd = dataGridViewLineCodeList.Rows[i].Cells[0].Value.ToString();
 
-            if (e.ColumnIndex == 3)
+            try
             {
-                string message = "Do you want to delete this Line Code " + slctd + "?";
-                string title = "Delete Line Code";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 3)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
-                    try
+                    string message = "Do you want to delete this Line Code " + slctd + "?";
+                    string title = "Delete Line Code";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        string koneksi = ConnectionDB.strProvider;
+                        myConn = new MySqlConnection(koneksi);
+
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_masterlinecode WHERE name = '" + slctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -273,24 +278,25 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         LineCodelist lineCodelist = new LineCodelist();
                         lineCodelist.toolStripUsername.Text = toolStripUsername.Text;
                         lineCodelist.Show();
                         this.Hide();
                         MessageBox.Show("Record Deleted successfully", "Line Code List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Line Code", "Line Code List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected Line Code", "Line Code List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void refreshLbl_Click(object sender, EventArgs e)

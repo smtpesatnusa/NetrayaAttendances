@@ -21,8 +21,7 @@ namespace SMTAttendance
         string dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
         string dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
 
-        string totalLessBreak;
-        string totalOverBreak;
+        string totalLessBreak, totalOverBreak;
 
         string late3, late2, late1;
         string ontime3, ontime2, ontime1;
@@ -96,9 +95,7 @@ namespace SMTAttendance
             finally
             {
                 myConn.Dispose();
-            }
-
-           
+            }           
 
             timerRefresh.Start();
         }
@@ -193,10 +190,8 @@ namespace SMTAttendance
 
         private void sendEmail()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {              
-
                 var from = new MailAddress("yunindafaranika@gmail.com");
                 var to = new MailAddress("yunindafaranika@gmail.com");
                 var subject = "Email with attachment";
@@ -227,12 +222,10 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
             }
         }
 
@@ -240,14 +233,12 @@ namespace SMTAttendance
         private void displayData()
         {
             try
-            {
-                
+            {                
                 string queryTotalOntime = "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
                     "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
                     "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' " +
                     "AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime') AS A";
-
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryTotalOntime, myConn))
                 {
@@ -297,10 +288,6 @@ namespace SMTAttendance
             {
                 //MessageBox.Show("displayData: " + ex.Message);
             }
-
-
-
-
         }
 
         private void LoadDataLate3Day()
@@ -343,22 +330,18 @@ namespace SMTAttendance
                         {
                             late1 = dt.Rows[2]["total"].ToString();
                         }
-
-
-
                     }
                 }
             }
             catch(Exception ex)
             {
-                MessageBox.Show("LoadDataLate3Day: " + ex.Message);
+                //MessageBox.Show("LoadDataLate3Day: " + ex.Message);
             }
             
         }
 
         private void LoadDataOntime3Day()
-        {
-            
+        {            
             try
             {
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE  FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
@@ -405,7 +388,7 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show("LoadDataOntime3Day: " + ex.Message);
+               //MessageBox.Show("LoadDataOntime3Day: " + ex.Message);
             }
             
         }
@@ -498,14 +481,10 @@ namespace SMTAttendance
             {
                 //MessageBox.Show("LoadDataBreakOK3Day: " + ex.Message);
             }
-
-
-
         }
 
         private void LoadDataLate()
-        {
-            
+        {            
             try
             {
                 string query = "(SELECT linecode, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
@@ -523,8 +502,7 @@ namespace SMTAttendance
             {
                 
                 //MessageBox.Show("LoadDataLate; " + ex.Message);
-            }
-           
+            }           
         }
 
         // to display breaktime more than 60
@@ -590,8 +568,7 @@ namespace SMTAttendance
         private void timer_Tick(object sender, System.EventArgs e)
         {
             help.dateTimeNow(dateTimeNow);
-            //dataGridViewLate.FirstDisplayedCell = dataGridViewLate.Rows[dataGridViewLate.Rows.Count - 1].Cells[0];
-            
+            //dataGridViewLate.FirstDisplayedCell = dataGridViewLate.Rows[dataGridViewLate.Rows.Count - 1].Cells[0];            
         }
 
         private void exitToolStripMenuItem_Click(object sender, System.EventArgs e)
@@ -957,9 +934,7 @@ namespace SMTAttendance
             finally
             {
                 myConn.Dispose();
-            }
-
-            
+            }            
         }
 
         private void timerRefresh_Tick(object sender, EventArgs e)
@@ -981,7 +956,6 @@ namespace SMTAttendance
 
             if (e.ColumnIndex == 3)
             {
-
                 DetailPosition detailPosition = new DetailPosition();
                 detailPosition.tbBadge.Text = badgeslctd;
                 detailPosition.tbName.Text = employeeslctd;
@@ -1215,97 +1189,110 @@ namespace SMTAttendance
 
         private void CreateMenu()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
-            string menu = "SELECT a.roleID, b.parentID, b.nodetext, b.toolStripMenu FROM tbl_userrole a, tbl_menu b " +
-                "WHERE a.userid = '" + idUser + "' AND a.roleID = b.NodeID";
-            using (MySqlDataAdapter adpt = new MySqlDataAdapter(menu, connectionDB.connection))
-            {
-                DataTable dt = new DataTable();
-                adpt.Fill(dt);
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
-                // cek jika ada selected menu 
-                if (dt.Rows.Count > 0)
+            try
+            {
+                string menu = "SELECT a.roleID, b.parentID, b.nodetext, b.toolStripMenu FROM tbl_userrole a, tbl_menu b " +
+                "WHERE a.userid = '" + idUser + "' AND a.roleID = b.NodeID";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(menu, myConn))
                 {
-                    for (int i = 0; i < dt.Rows.Count; i++)
+                    DataTable dt = new DataTable();
+                    adpt.Fill(dt);
+
+                    // cek jika ada selected menu 
+                    if (dt.Rows.Count > 0)
                     {
-                        if (dt.Rows[i]["roleID"].ToString() == "1")
+                        for (int i = 0; i < dt.Rows.Count; i++)
                         {
-                            employeeToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "2")
-                        {
-                            scheduleToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "3")
-                        {
-                            attendancesToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "4")
-                        {
-                            masterDataToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "5")
-                        {
-                            administrationToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "6")
-                        {
-                            listToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "7")
-                        {
-                            groupToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "8")
-                        {
-                            genderToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "9")
-                        {
-                            employeeLevelToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "10")
-                        {
-                            departmentToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "11")
-                        {
-                            lineCodeToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "12")
-                        {
-                            sectionToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "13")
-                        {
-                            shiftToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "14")
-                        {
-                            deviceToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "15")
-                        {
-                            userToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "16")
-                        {
-                            userRoleToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "17")
-                        {
-                            leaveToolStripMenuItem.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "18")
-                        {
-                            listToolStripMenuItem1.Visible = true;
-                        }
-                        if (dt.Rows[i]["roleID"].ToString() == "19")
-                        {
-                            approvalToolStripMenuItem.Visible = true;
+                            if (dt.Rows[i]["roleID"].ToString() == "1")
+                            {
+                                employeeToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "2")
+                            {
+                                scheduleToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "3")
+                            {
+                                attendancesToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "4")
+                            {
+                                masterDataToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "5")
+                            {
+                                administrationToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "6")
+                            {
+                                listToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "7")
+                            {
+                                groupToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "8")
+                            {
+                                genderToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "9")
+                            {
+                                employeeLevelToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "10")
+                            {
+                                departmentToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "11")
+                            {
+                                lineCodeToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "12")
+                            {
+                                sectionToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "13")
+                            {
+                                shiftToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "14")
+                            {
+                                deviceToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "15")
+                            {
+                                userToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "16")
+                            {
+                                userRoleToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "17")
+                            {
+                                leaveToolStripMenuItem.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "18")
+                            {
+                                listToolStripMenuItem1.Visible = true;
+                            }
+                            if (dt.Rows[i]["roleID"].ToString() == "19")
+                            {
+                                approvalToolStripMenuItem.Visible = true;
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                myConn.Dispose();
             }
         }
     }

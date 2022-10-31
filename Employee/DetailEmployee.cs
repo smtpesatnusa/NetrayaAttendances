@@ -10,6 +10,7 @@ namespace SMTAttendance
     {
         Helper help = new Helper();
         string idUser, dept;
+        MySqlConnection myConn;
 
         public DetailEmployee()
         {
@@ -18,63 +19,76 @@ namespace SMTAttendance
 
         private void AddEmployee_Load(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
-
             //get user id
             var userId = userdetail.Text.Split('|');
             idUser = userId[0].Trim();
             dept = userId[1].Trim();
 
-            //menampilkan data combobox 
-            help.displayCmbList("SELECT * FROM tbl_mastershift ORDER BY id ", "name", "name", cmbShift);
-            help.displayCmbList("SELECT CONCAT(name, ' - ', description) AS names, name FROM tbl_masteremployeelevel ORDER BY id ", "names", "name", cmbLevel);
-            help.displayCmbList("SELECT * FROM tbl_mastergender ORDER BY id ", "name", "name", cmbGender);
-            help.displayCmbList("SELECT * FROM tbl_masterworkarea ORDER BY id ", "name", "name", cmbWorkarea);
-            //get dept depend on user dept
-            if (dept == "All")
-            {
-                help.displayCmbList("SELECT * FROM tbl_masterdepartment ORDER BY id ", "name", "name", cmbDepartment);
-            }
-            else
-            {
-                help.displayCmbList("SELECT * FROM tbl_masterdepartment where name = '" + dept + "' ORDER BY id ", "name", "name", cmbDepartment);
-            }
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
-            //"SELECT name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift FROM tbl_employee ORDER BY id DESC";
-            string query = "SELECT id, name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift, workarea FROM tbl_employee where rfidNo ='" + tbRFID.Text + "'";
-            using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+            try
             {
-                DataTable dset = new DataTable();
-                adpt.Fill(dset);
-                if (dset.Rows.Count > 0)
+                //menampilkan data combobox 
+                help.displayCmbList("SELECT * FROM tbl_mastershift ORDER BY id ", "name", "name", cmbShift);
+                help.displayCmbList("SELECT CONCAT(name, ' - ', description) AS names, name FROM tbl_masteremployeelevel ORDER BY id ", "names", "name", cmbLevel);
+                help.displayCmbList("SELECT * FROM tbl_mastergender ORDER BY id ", "name", "name", cmbGender);
+                help.displayCmbList("SELECT * FROM tbl_masterworkarea ORDER BY id ", "name", "name", cmbWorkarea);
+                //get dept depend on user dept
+                if (dept == "All")
                 {
-                    string id = dset.Rows[0]["id"].ToString();
-                    string name = dset.Rows[0]["name"].ToString();
-                    string level = dset.Rows[0]["level"].ToString();
-                    string dept = dset.Rows[0]["dept"].ToString();
-                    string badgeID = dset.Rows[0]["badgeID"].ToString();
-                    string doj = dset.Rows[0]["doj"].ToString();
-                    string linecode = dset.Rows[0]["linecode"].ToString();
-                    string gender = dset.Rows[0]["gender"].ToString();
-                    string shift = dset.Rows[0]["shift"].ToString();
-                    string workarea = dset.Rows[0]["workarea"].ToString();
-
-                    idEmployee.Text = id;
-                    tbBadgeid.Text = badgeID;
-                    tbName.Text = name;
-                    dateTimePickerDOJ.Text = doj;
-                    cmbShift.SelectedIndex = cmbShift.FindStringExact(shift);
-                    cmbLevel.SelectedIndex = cmbLevel.FindString(level);
-                    cmbDepartment.SelectedIndex = cmbDepartment.FindStringExact(dept);
-                    cmbGender.SelectedIndex = cmbGender.FindStringExact(gender);
-                    cmbWorkarea.SelectedIndex = cmbWorkarea.FindStringExact(workarea);
-
-                    if (cmbDepartment.Text != "")
-                    {
-                        help.displayCmbList("SELECT * FROM tbl_masterlinecode WHERE dept = '" + cmbDepartment.Text + "' ORDER BY id ", "name", "id", cmbLineCode);
-                    }
-                    cmbLineCode.SelectedIndex = cmbLineCode.FindStringExact(linecode);
+                    help.displayCmbList("SELECT * FROM tbl_masterdepartment ORDER BY id ", "name", "name", cmbDepartment);
                 }
+                else
+                {
+                    help.displayCmbList("SELECT * FROM tbl_masterdepartment where name = '" + dept + "' ORDER BY id ", "name", "name", cmbDepartment);
+                }
+
+                //"SELECT name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift FROM tbl_employee ORDER BY id DESC";
+                string query = "SELECT id, name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift, workarea FROM tbl_employee where rfidNo ='" + tbRFID.Text + "'";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
+                {
+                    DataTable dset = new DataTable();
+                    adpt.Fill(dset);
+                    if (dset.Rows.Count > 0)
+                    {
+                        string id = dset.Rows[0]["id"].ToString();
+                        string name = dset.Rows[0]["name"].ToString();
+                        string level = dset.Rows[0]["level"].ToString();
+                        string dept = dset.Rows[0]["dept"].ToString();
+                        string badgeID = dset.Rows[0]["badgeID"].ToString();
+                        string doj = dset.Rows[0]["doj"].ToString();
+                        string linecode = dset.Rows[0]["linecode"].ToString();
+                        string gender = dset.Rows[0]["gender"].ToString();
+                        string shift = dset.Rows[0]["shift"].ToString();
+                        string workarea = dset.Rows[0]["workarea"].ToString();
+
+                        idEmployee.Text = id;
+                        tbBadgeid.Text = badgeID;
+                        tbName.Text = name;
+                        dateTimePickerDOJ.Text = doj;
+                        cmbShift.SelectedIndex = cmbShift.FindStringExact(shift);
+                        cmbLevel.SelectedIndex = cmbLevel.FindString(level);
+                        cmbDepartment.SelectedIndex = cmbDepartment.FindStringExact(dept);
+                        cmbGender.SelectedIndex = cmbGender.FindStringExact(gender);
+                        cmbWorkarea.SelectedIndex = cmbWorkarea.FindStringExact(workarea);
+
+                        if (cmbDepartment.Text != "")
+                        {
+                            help.displayCmbList("SELECT * FROM tbl_masterlinecode WHERE dept = '" + cmbDepartment.Text + "' ORDER BY id ", "name", "id", cmbLineCode);
+                        }
+                        cmbLineCode.SelectedIndex = cmbLineCode.FindStringExact(linecode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
             }
         }
 
@@ -165,10 +179,11 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string rfid = tbRFID.Text;
                     string badgeid = tbBadgeid.Text;
                     string name = tbName.Text;
@@ -184,7 +199,7 @@ namespace SMTAttendance
                     DateTime dt = Convert.ToDateTime(_Date);
                     string doj = dt.ToString("yyyy-MM-dd");
 
-                    connectionDB.connection.Open();
+                    myConn.Open();
 
                     // insert schedule if employee is normal shift and update data tbl_employee
                     if (shift == "Normal" || shift == "normal")
@@ -215,18 +230,18 @@ namespace SMTAttendance
                         cmd.ExecuteNonQuery();
                     }
 
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     MessageBox.Show(this, "Employee Successfully Updated", "Edit Employee", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

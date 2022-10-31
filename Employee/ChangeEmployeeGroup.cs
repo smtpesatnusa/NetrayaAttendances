@@ -9,11 +9,9 @@ namespace SMTAttendance
     public partial class ChangeEmployeeGroup : Form
     {
         readonly Helper help = new Helper();
-        readonly ConnectionDB connectionDB = new ConnectionDB();
-
         string idUser, dept;
-
         string employeeId;
+        MySqlConnection myConn;
 
         public ChangeEmployeeGroup()
         {
@@ -45,6 +43,9 @@ namespace SMTAttendance
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             if (listBoxGroup1.Items.Count == 0 || listBoxGroup2.Items.Count == 0)
             {
                 MessageBox.Show("Unable to change employee group with let any group empty", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -53,7 +54,7 @@ namespace SMTAttendance
             {
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     // get groupID
                     var groupEmployee = cmbGroup1.Text.Trim().Split('|');
@@ -62,7 +63,7 @@ namespace SMTAttendance
                     var groupEmployee2 = cmbGroup2.Text.Trim().Split('|');
                     string groupId2 = groupEmployee2[0];
 
-                    connectionDB.connection.Open();
+                    myConn.Open();
 
                     //delete group data
                     string querydelete1 = "DELETE FROM tbl_employeegroupdetail WHERE groupId = '" + groupId + "'";
@@ -107,15 +108,18 @@ namespace SMTAttendance
                         cmd.ExecuteNonQuery();
                     }
 
-                    connectionDB.connection.Close();
-
+                    myConn.Close();
                     MessageBox.Show(this, "Employee Group Successfully Updated", "Update Employee Group", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message);
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    myConn.Dispose();
                 }
             }
         }
@@ -143,7 +147,6 @@ namespace SMTAttendance
 
             help.displayCmbList("SELECT CONCAT(id,' | ', NAME) AS NAMES FROM tbl_employeegroup WHERE dept = '" + cmbDepartment.Text + "' AND linecode = '" + cmbLineCode.Text + "' ORDER BY NAME", "names", "names", cmbGroup1);
             help.displayCmbList("SELECT CONCAT(id,' | ', NAME) AS NAMES FROM tbl_employeegroup WHERE dept = '" + cmbDepartment.Text + "' AND linecode = '" + cmbLineCode.Text + "' ORDER BY NAME", "names", "names", cmbGroup2);
-
         }
 
         private void cmbGroup1_SelectedIndexChanged(object sender, EventArgs e)

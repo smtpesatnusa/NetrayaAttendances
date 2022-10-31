@@ -9,8 +9,8 @@ namespace SMTAttendance
     public partial class Departmentlist : MaterialForm
     {
         readonly Helper help = new Helper();
-
         string idUser, dept;
+        MySqlConnection myConn;
 
         public Departmentlist()
         {
@@ -78,11 +78,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT name,description from tbl_masterdepartment ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -101,12 +102,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -126,15 +127,16 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string department = tbDepartment.Text;
                     string desc = tbDesc.Text;
 
                     string cekdept = "SELECT * FROM tbl_masterdepartment WHERE name = '" + department + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdept, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekdept, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -149,7 +151,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdddepartment = "INSERT INTO tbl_masterdepartment (name, description, createDate, createBy) VALUES " +
                                 "('" + department + "', '" + desc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -161,7 +163,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Department Successfully Added", "Add Department", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             tbDepartment.Clear();
                             tbDesc.Clear();
@@ -172,12 +174,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -215,49 +217,63 @@ namespace SMTAttendance
             int i;
             i = dataGridViewDepartmentList.SelectedCells[0].RowIndex;
             string depslctd = dataGridViewDepartmentList.Rows[i].Cells[0].Value.ToString();
-            ConnectionDB connectionDB = new ConnectionDB();
-            if (e.ColumnIndex == 2)
+
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
+            try
             {
-                string message = "Do you want to delete this Department " + depslctd + "?";
-                string title = "Delete Department";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 2)
                 {
-                    try
+                    string message = "Do you want to delete this Department " + depslctd + "?";
+                    string title = "Delete Department";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
-
-                        string querydeletePO = "DELETE FROM tbl_masterdepartment WHERE name = '" + depslctd + "'";
-                        connectionDB.connection.Open();
-
-                        string[] allQuery = { querydeletePO };
-                        for (int j = 0; j < allQuery.Length; j++)
+                        try
                         {
-                            cmd.CommandText = allQuery[j];
-                            //Masukkan perintah/query yang akan dijalankan ke dalam CommandText
-                            cmd.ExecuteNonQuery();
-                            //Jalankan perintah / query dalam CommandText pada database
-                        }
+                            var cmd = new MySqlCommand("", myConn);
 
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Record Deleted successfully", "Department List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        refresh();
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Department", "Department List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+                            string querydeletePO = "DELETE FROM tbl_masterdepartment WHERE name = '" + depslctd + "'";
+                            myConn.Open();
+
+                            string[] allQuery = { querydeletePO };
+                            for (int j = 0; j < allQuery.Length; j++)
+                            {
+                                cmd.CommandText = allQuery[j];
+                                //Masukkan perintah/query yang akan dijalankan ke dalam CommandText
+                                cmd.ExecuteNonQuery();
+                                //Jalankan perintah / query dalam CommandText pada database
+                            }
+
+                            myConn.Close();
+                            MessageBox.Show("Record Deleted successfully", "Department List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            refresh();
+                        }
+                        catch (Exception ex)
+                        {
+                            myConn.Close();
+                            MessageBox.Show("Unable to remove selected Department", "Department List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            //MessageBox.Show(ex.Message);
+                        }
+                        finally
+                        {
+                            myConn.Dispose();
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void dataGridViewDepartmentList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

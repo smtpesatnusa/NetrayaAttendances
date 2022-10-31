@@ -4,8 +4,7 @@ namespace SMTAttendance
 {
     public partial class DetailEmployeeGroup : MaterialForm
     {
-        Helper help = new Helper();
-        
+        Helper help = new Helper();        
         public DetailEmployeeGroup()
         {
             InitializeComponent();

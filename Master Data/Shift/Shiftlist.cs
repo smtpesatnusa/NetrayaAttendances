@@ -10,6 +10,7 @@ namespace SMTAttendance
     {
         readonly Helper help = new Helper();
         string idUser, dept;
+        MySqlConnection myConn;
 
         public Shiftlist()
         {
@@ -79,7 +80,9 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 //string query = "SELECT a.name, CONCAT(LEFT(a.intime, 5),'-', LEFT(a.outtime, 5)) AS WorkHour, " +
@@ -91,7 +94,7 @@ namespace SMTAttendance
                 string query = "SELECT a.name, a.category, CONCAT(LEFT(a.intime, 5),'-', LEFT(a.outtime, 5)) AS WorkHour, totalBreak " +
                     "FROM tbl_mastershiftdetail a ORDER BY id DESC";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -109,12 +112,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -151,48 +154,46 @@ namespace SMTAttendance
             i = dataGridViewShiftList.SelectedCells[0].RowIndex;
             string slctd = dataGridViewShiftList.Rows[i].Cells[0].Value.ToString();
 
-            if (e.ColumnIndex == 4)
+            try
             {
-                string message = "Do you want to delete this Shift " + slctd + "?";
-                string title = "Delete Shift";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 4)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
-                    try
+                    string message = "Do you want to delete this Shift " + slctd + "?";
+                    string title = "Delete Shift";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        string koneksi = ConnectionDB.strProvider;
+                        myConn = new MySqlConnection(koneksi);
+
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_mastershiftdetail WHERE name = '" + slctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         cmd.CommandText = querydelete;
                         cmd.ExecuteNonQuery();
 
-                        connectionDB.connection.Close();
-                        Shiftlist shiftlist = new Shiftlist();
-                        shiftlist.toolStripUsername.Text = toolStripUsername.Text;
-                        shiftlist.userdetail.Text = userdetail.Text;
-                        shiftlist.Show();
-                        this.Hide();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Shift List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Shift", "Shift List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+                        refresh();
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected Shift", "Shift List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }
+            
         }
 
         private void dataGridViewShiftList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

@@ -9,8 +9,8 @@ namespace SMTAttendance
     public partial class LeaveTypeList : MaterialForm
     {
         readonly Helper help = new Helper();
-
         string idUser, dept;
+        MySqlConnection myConn;
 
         public LeaveTypeList()
         {
@@ -81,11 +81,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT name,description from tbl_masterleavetype ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -104,12 +105,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -129,15 +130,17 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
+
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string lType = tbLeaveType.Text;
                     string desc = tbDesc.Text;
 
                     string cek = "SELECT * FROM tbl_masterleavetype WHERE name = '" + lType + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -152,7 +155,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_masterleavetype (name, description, createDate, createBy) VALUES " +
                                 "('" + lType + "', '" + desc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -164,7 +167,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Leave Type Successfully Added", "Add Leave Type", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             tbLeaveType.Clear();
                             tbDesc.Clear();
@@ -175,12 +178,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -218,23 +221,25 @@ namespace SMTAttendance
             i = dataGridViewLeaveTypeList.SelectedCells[0].RowIndex;
             string depslctd = dataGridViewLeaveTypeList.Rows[i].Cells[0].Value.ToString();
 
-            if (e.ColumnIndex == 2)
+            try
             {
-                string message = "Do you want to delete this Leave Type " + depslctd + "?";
-                string title = "Delete Leave Type";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 2)
                 {
-                    ConnectionDB connectionDB = new ConnectionDB();
-                    try
+                    string message = "Do you want to delete this Leave Type " + depslctd + "?";
+                    string title = "Delete Leave Type";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        string koneksi = ConnectionDB.strProvider;
+                        myConn = new MySqlConnection(koneksi);
+
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydeletePO = "DELETE FROM tbl_masterleavetype WHERE name = '" + depslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydeletePO };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -245,25 +250,23 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
-                        LeaveTypeList leaveTypeList = new LeaveTypeList();
-                        leaveTypeList.toolStripUsername.Text = toolStripUsername.Text;
-                        leaveTypeList.Show();
-                        this.Hide();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Leave Type List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected Leave Type", "Leave Type List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+                        refresh();
+
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected Leave Type", "Leave Type List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void dataGridViewLeaveTypeList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

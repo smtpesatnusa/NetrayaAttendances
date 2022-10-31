@@ -17,6 +17,8 @@ namespace SMTAttendance
         string idUser, dept;
         string duplicaterfid = string.Empty;
 
+        MySqlConnection myConn;
+
         public ImportEmployee()
         {
             InitializeComponent();
@@ -98,14 +100,16 @@ namespace SMTAttendance
 
         private void bgWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var cmd = new MySqlCommand("", connectionDB.connection);
-                connectionDB.connection.Open();
+                var cmd = new MySqlCommand("", myConn);
+                myConn.Open();
                 //Buka koneksi
 
                 for (int i = 0; i < dataGridViewEmployee.Rows.Count; i++)
@@ -143,19 +147,19 @@ namespace SMTAttendance
                 stopwatch.Stop();
                 Debug.WriteLine(" inserts took " + stopwatch.ElapsedMilliseconds + " ms");
 
-                connectionDB.connection.Close();
+                myConn.Close();
                 //Tutup koneksi
                 MessageBox.Show("Import Employee complete", "Employee", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message.ToString());
+                myConn.Close();
+                //MessageBox.Show(ex.Message.ToString());
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -231,7 +235,7 @@ namespace SMTAttendance
                 catch (Exception ex)
                 {
                     CloseProgress();
-                    MessageBox.Show(ex.Message);
+                    //MessageBox.Show(ex.Message);
                     MessageBox.Show(this, "Please select Employee file with correct format", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Error); //custom messageBox to show error 
                     tbfilepathMM.Clear();
                     saveBtn.Enabled = false;
@@ -290,7 +294,7 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message.ToString());
+                //MessageBox.Show(ex.Message.ToString());
             }
         }
 

@@ -9,9 +9,9 @@ namespace SMTAttendance
     public partial class WorkArealist : MaterialForm
     {
         readonly Helper help = new Helper();
-        readonly ConnectionDB connectionDB = new ConnectionDB();
-        
+
         string idUser, dept;
+        MySqlConnection myConn;
 
         public WorkArealist()
         {
@@ -45,6 +45,8 @@ namespace SMTAttendance
         private void refresh()
         {
             tbSearch.Clear();
+            tbWorkArea.Clear();
+            tbDesc.Clear();
 
             // remove data in datagridview result
             dataGridViewWorkAreaList.DataSource = null;
@@ -63,10 +65,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT name,description from tbl_masterworkarea ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -85,8 +89,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
             }
         }
 
@@ -106,14 +114,16 @@ namespace SMTAttendance
             }
             else
             {
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string workarea = tbWorkArea.Text;
                     string desc = tbDesc.Text;
 
                     string cek = "SELECT * FROM tbl_masterworkarea WHERE name = '" + workarea + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -128,7 +138,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_masterworkarea (name, description, createDate, createBy) VALUES " +
                                 "('" + workarea + "', '" + desc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -140,10 +150,8 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Work Area Successfully Added", "Add Work Area", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            tbWorkArea.Clear();
-                            tbDesc.Clear();
                             refresh();
                             tbWorkArea.Focus();
                         }
@@ -151,8 +159,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
+                }
+                finally
+                {
+                    myConn.Dispose();
                 }
             }
         }
@@ -183,6 +195,9 @@ namespace SMTAttendance
             i = dataGridViewWorkAreaList.SelectedCells[0].RowIndex;
             string workareaslctd = dataGridViewWorkAreaList.Rows[i].Cells[0].Value.ToString();
 
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             if (e.ColumnIndex == 2)
             {
                 string message = "Do you want to delete this Work Area " + workareaslctd + "?";
@@ -195,10 +210,10 @@ namespace SMTAttendance
                 {
                     try
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydelete = "DELETE FROM tbl_masterworkarea WHERE name = '" + workareaslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydelete };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -209,15 +224,19 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Work Area List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         refresh();
                     }
                     catch (Exception ex)
                     {
-                        connectionDB.connection.Close();
+                        myConn.Close();
                         MessageBox.Show("Unable to remove selected Work Area", "Work Area List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         //MessageBox.Show(ex.Message);
+                    }
+                    finally
+                    {
+                        myConn.Dispose();
                     }
                 }
             }

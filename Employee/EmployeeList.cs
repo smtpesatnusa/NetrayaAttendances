@@ -19,7 +19,8 @@ namespace SMTAttendance
         private int currentPage;
         private int recNo;
         private string Sql;
-        ConnectionDB connectionDB = new ConnectionDB();
+
+        MySqlConnection myConn;
 
         string idUser, dept;
 
@@ -137,10 +138,9 @@ namespace SMTAttendance
 
         private void LoadDS(string SQL)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {
-                MySqlDataAdapter da = new MySqlDataAdapter(SQL, connectionDB.connection);
+                MySqlDataAdapter da = new MySqlDataAdapter(SQL, myConn);
                 ds = new DataSet();
 
                 // Fill the DataSet.
@@ -155,7 +155,7 @@ namespace SMTAttendance
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -263,10 +263,12 @@ namespace SMTAttendance
 
         private void loadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
-                connectionDB.connection.Open();
+                myConn.Open();
 
                 if (dept == "All")
                 {
@@ -286,18 +288,18 @@ namespace SMTAttendance
 
                 CloseProgress();
 
-                connectionDB.connection.Close();
+                myConn.Close();
 
                 totalLbl.Text = dtSource.Rows.Count.ToString();
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -430,54 +432,69 @@ namespace SMTAttendance
             int i;
             i = dataGridViewEmployeeList.SelectedCells[0].RowIndex;
             string badgeslctd = dataGridViewEmployeeList.Rows[i].Cells[3].Value.ToString();
-            string rfidslctd = dataGridViewEmployeeList.Rows[i].Cells[4].Value.ToString();            
+            string rfidslctd = dataGridViewEmployeeList.Rows[i].Cells[4].Value.ToString();
 
-            if (e.ColumnIndex == 9)
-            {
-                DetailEmployee detailEmployee = new DetailEmployee();
-                detailEmployee.userdetail.Text = userdetail.Text;
-                detailEmployee.tbRFID.Text = rfidslctd;
-                detailEmployee.ShowDialog();
-                //detailAttendance.toolStripUsername.Text = toolStripUsername.Text;
-                //this.Hide();
-            }
-            if (e.ColumnIndex == 10)
-            {
-                string message = "Do you want to delete this Employee with Badge ID " + badgeslctd + "?";
-                string title = "Delete Employee";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
-                if (result == DialogResult.Yes)
+            try 
+            {
+                if (e.ColumnIndex == 9)
                 {
-                    try
+                    DetailEmployee detailEmployee = new DetailEmployee();
+                    detailEmployee.userdetail.Text = userdetail.Text;
+                    detailEmployee.tbRFID.Text = rfidslctd;
+                    detailEmployee.ShowDialog();
+                    //detailAttendance.toolStripUsername.Text = toolStripUsername.Text;
+                    //this.Hide();
+                }
+                if (e.ColumnIndex == 10)
+                {
+                    string message = "Do you want to delete this Employee with Badge ID " + badgeslctd + "?";
+                    string title = "Delete Employee";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
-
-                        string querydelete = "DELETE FROM tbl_employee WHERE badgeID = '" + badgeslctd + "'";
-                        connectionDB.connection.Open();
-
-                        string[] allQuery = { querydelete };
-                        for (int j = 0; j < allQuery.Length; j++)
+                        try
                         {
-                            cmd.CommandText = allQuery[j];
-                            //Masukkan perintah/query yang akan dijalankan ke dalam CommandText
-                            cmd.ExecuteNonQuery();
-                            //Jalankan perintah / query dalam CommandText pada database
-                        }
+                            var cmd = new MySqlCommand("", myConn);
 
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Record Deleted successfully", "Employee List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        refresh();
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected employee", "Employee List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            string querydelete = "DELETE FROM tbl_employee WHERE badgeID = '" + badgeslctd + "'";
+                            myConn.Open();
+
+                            string[] allQuery = { querydelete };
+                            for (int j = 0; j < allQuery.Length; j++)
+                            {
+                                cmd.CommandText = allQuery[j];
+                                //Masukkan perintah/query yang akan dijalankan ke dalam CommandText
+                                cmd.ExecuteNonQuery();
+                                //Jalankan perintah / query dalam CommandText pada database
+                            }
+
+                            myConn.Close();
+                            MessageBox.Show("Record Deleted successfully", "Employee List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            refresh();
+                        }
+                        catch (Exception ex)
+                        {
+                            myConn.Close();
+                            MessageBox.Show("Unable to remove selected employee", "Employee List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void dataGridViewEmployeeList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -515,7 +532,8 @@ namespace SMTAttendance
 
         private void deleteAllLbl_Click(object sender, EventArgs e)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
 
             string message = "Are you sure want to delete All this Employee Data?";
             string title = "Delete Employee";
@@ -526,11 +544,11 @@ namespace SMTAttendance
             {
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
 
                     //string querydelete = "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE table tbl_employee; SET FOREIGN_KEY_CHECKS = 1;";
                     string querydelete = "TRUNCATE table tbl_employee";
-                    connectionDB.connection.Open();
+                    myConn.Open();
 
                     string[] allQuery = { querydelete };
                     for (int j = 0; j < allQuery.Length; j++)
@@ -541,7 +559,7 @@ namespace SMTAttendance
                         //Jalankan perintah / query dalam CommandText pada database
                     }
 
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     Employeelist employeelist = new Employeelist();
                     employeelist.toolStripUsername.Text = toolStripUsername.Text;
                     employeelist.userdetail.Text = userdetail.Text;
@@ -551,13 +569,13 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     MessageBox.Show("Unable to employee, employee already assign to group. Delete employee group before delete all employee", "Employee List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    MessageBox.Show(ex.Message.ToString());
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }

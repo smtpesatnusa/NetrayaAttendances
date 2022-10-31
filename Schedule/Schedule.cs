@@ -28,6 +28,8 @@ namespace SMTAttendance
         int month;
         int totalDay;
 
+        MySqlConnection myConn;
+
         public Schedule()
         {
             InitializeComponent();
@@ -126,10 +128,12 @@ namespace SMTAttendance
 
         private void LoadDS(string SQL)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
-                MySqlDataAdapter da = new MySqlDataAdapter(SQL, connectionDB.connection);
+                MySqlDataAdapter da = new MySqlDataAdapter(SQL, myConn);
                 ds = new DataSet();
 
                 // Fill the DataSet.
@@ -140,11 +144,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                myConn.Close();
+                //MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -202,10 +207,11 @@ namespace SMTAttendance
 
         private void loadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
-                connectionDB.connection.Open();
+                myConn.Open();
 
                 // get month year datepicker
                 string _Date = dateTimePickerDate.Text;
@@ -244,18 +250,18 @@ namespace SMTAttendance
 
                 CloseProgress();
 
-                connectionDB.connection.Close();
+                myConn.Close();
 
                 totalLbl.Text = dtSource.Rows.Count.ToString();
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -419,7 +425,9 @@ namespace SMTAttendance
 
         private void ExportToExcel()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 string monthYear = monthSelected.Text;
@@ -494,7 +502,7 @@ namespace SMTAttendance
                     int cellRowIndex = 5;
                     int cellColumnIndex = 2;
 
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(Sql, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(Sql, myConn))
                     {
                         DataTable dt = new DataTable();
                         adpt.Fill(dt);
@@ -549,11 +557,12 @@ namespace SMTAttendance
             catch (Exception ex)
             {
                 // tampilkan pesan error
+                myConn.Close();
                 MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 

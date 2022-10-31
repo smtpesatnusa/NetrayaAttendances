@@ -8,8 +8,9 @@ namespace SMTAttendance
     public partial class DetailBreak : Form
     {
         readonly Helper help = new Helper();
-
         string dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
+        MySqlConnection myConn;
 
         public DetailBreak()
         {
@@ -21,11 +22,26 @@ namespace SMTAttendance
             tbDate.Text = dateNow;
             string badge = tbBadge.Text;
             string date = tbDate.Text;
-
-            // detail break
-            string detail = "SELECT a.timeOut, a.timeIn, a.duration FROM tbl_durationbreak a, tbl_employee b " +
-                "WHERE a.date = '"+date+"' AND b.badgeId = '"+badge+"' AND a.rfidNo = b.rfidNo ORDER BY a.id DESC";
-            help.fill_dgv(detail, dataGridViewBreakList);
+            try
+            {
+                // detail break
+                string detail = "SELECT a.timeOut, a.timeIn, a.duration FROM tbl_durationbreak a, tbl_employee b " +
+                "WHERE a.date = '" + date + "' AND b.badgeId = '" + badge + "' AND a.rfidNo = b.rfidNo ORDER BY a.id DESC";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(detail, myConn))
+                {
+                    DataSet dset = new DataSet();
+                    adpt.Fill(dset);
+                    dataGridViewBreakList.DataSource = dset.Tables[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("LoadDataLate; " + ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }
         }
                         
         private void dataGridViewScheduleList_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -47,7 +63,6 @@ namespace SMTAttendance
         {
             this.Close();
         }
-
 
         private void dataGridViewAttendanceList_Paint(object sender, PaintEventArgs e)
         {

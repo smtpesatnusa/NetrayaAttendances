@@ -22,6 +22,7 @@ namespace SMTAttendance
         private int recNo;
 
         DateTime dt1, dt2;
+        MySqlConnection myConn;
 
         public OnlineStatus()
         {
@@ -142,10 +143,12 @@ namespace SMTAttendance
 
         private void LoadDS(string SQL)
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
-                MySqlDataAdapter da = new MySqlDataAdapter(SQL, connectionDB.connection);
+                MySqlDataAdapter da = new MySqlDataAdapter(SQL, myConn);
                 ds = new DataSet();
 
                 // Fill the DataSet.
@@ -156,11 +159,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                myConn.Close();
+                //MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -264,13 +268,15 @@ namespace SMTAttendance
 
         private void LoadDataOnline()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 dt1 = dtBegin.Value;
                 dt2 = dtEnd.Value;
 
-                connectionDB.connection.Open();
+                myConn.Open();
 
                 string query = "SELECT b.badgeId, b.name, b.linecode FROM tbl_attendance a, tbl_employee b WHERE a.emplid = b.id AND b.dept = '"+dept+"' AND " +
                     "(a.date BETWEEN '" + dt1.ToString("yyyy-MM-dd") + "' AND '" + dt2.ToString("yyyy-MM-dd") + "') GROUP BY b.badgeId, b.name, b.linecode";
@@ -283,23 +289,25 @@ namespace SMTAttendance
                 string record = dtSource.Rows.Count.ToString();
 
                 CloseProgress();
-                connectionDB.connection.Close();
+                myConn.Close();
                 totalLblAll.Text = dtSource.Rows.Count.ToString();
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
         private void LoadDataOffline()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+
             try
             {
                 dt1 = dtBegin.Value;
@@ -308,7 +316,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode FROM tbl_employee WHERE badgeID NOT IN(SELECT b.badgeId FROM tbl_attendance a, " +
                     "tbl_employee b WHERE a.emplid = b.id AND b.dept = '" + dept + "' AND (a.date BETWEEN '" + dt1.ToString("yyyy-MM-dd") + "' AND '" + dt2.ToString("yyyy-MM-dd") + "'))";
                    
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -321,12 +329,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
         

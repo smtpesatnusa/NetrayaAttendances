@@ -9,8 +9,8 @@ namespace SMTAttendance
     public partial class EmployeeLevellist : MaterialForm
     {
         readonly Helper help = new Helper();
-
         string idUser, dept;
+        MySqlConnection myConn;
 
         public EmployeeLevellist()
         {
@@ -64,11 +64,12 @@ namespace SMTAttendance
 
         private void LoadData()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
             try
             {
                 string query = "SELECT name,description from tbl_masteremployeelevel ORDER BY id DESC";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -87,12 +88,12 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                myConn.Close();
+                //MessageBox.Show(ex.Message);
             }
             finally
             {
-                connectionDB.connection.Dispose();
+                myConn.Dispose();
             }
         }
 
@@ -112,15 +113,17 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
+
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string userlevel = tbEmployeeLevel.Text;
                     string desc = tbDesc.Text;
 
                     string cekmodel = "SELECT * FROM tbl_masteremployeelevel WHERE name = '" + userlevel + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekmodel, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cekmodel, myConn))
                     {
                         DataSet ds = new DataSet();
                         adpt.Fill(ds);
@@ -135,7 +138,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAddmodel = "INSERT INTO tbl_masteremployeelevel (name, description, createDate, createBy) VALUES " +
                                 "('" + userlevel + "', '" + desc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -147,7 +150,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                                 //Jalankan perintah / query dalam CommandText pada database
                             }
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Employeee Level Successfully Added", "Add Employee Level", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             tbEmployeeLevel.Clear();
                             tbDesc.Clear();
@@ -158,12 +161,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
+                    myConn.Close();
                     MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
@@ -228,24 +231,26 @@ namespace SMTAttendance
             int i;
             i = dataGridViewEmployeeLevelList.SelectedCells[0].RowIndex;
             string levelslctd = dataGridViewEmployeeLevelList.Rows[i].Cells[0].Value.ToString();
-            ConnectionDB connectionDB = new ConnectionDB();
 
-            if (e.ColumnIndex == 2)
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+            try
             {
-                string message = "Do you want to delete this Employee Level " + levelslctd + "?";
-                string title = "Delete Employee Level";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                MessageBoxIcon icon = MessageBoxIcon.Information;
-                DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
-
-                if (result == DialogResult.Yes)
+                if (e.ColumnIndex == 2)
                 {
-                    try
+                    string message = "Do you want to delete this Employee Level " + levelslctd + "?";
+                    string title = "Delete Employee Level";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                    MessageBoxIcon icon = MessageBoxIcon.Information;
+                    DialogResult result = MessageBox.Show(this, message, title, buttons, icon);
+
+                    if (result == DialogResult.Yes)
                     {
-                        var cmd = new MySqlCommand("", connectionDB.connection);
+
+                        var cmd = new MySqlCommand("", myConn);
 
                         string querydeletePO = "DELETE FROM tbl_masteremployeelevel WHERE name = '" + levelslctd + "'";
-                        connectionDB.connection.Open();
+                        myConn.Open();
 
                         string[] allQuery = { querydeletePO };
                         for (int j = 0; j < allQuery.Length; j++)
@@ -256,25 +261,22 @@ namespace SMTAttendance
                             //Jalankan perintah / query dalam CommandText pada database
                         }
 
-                        connectionDB.connection.Close();
-                        EmployeeLevellist employeeLevellist = new EmployeeLevellist();
-                        employeeLevellist.toolStripUsername.Text = toolStripUsername.Text;
-                        employeeLevellist.Show();
-                        this.Hide();
+                        myConn.Close();
                         MessageBox.Show("Record Deleted successfully", "Employee Level List Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        connectionDB.connection.Close();
-                        MessageBox.Show("Unable to remove selected employee level", "Employee Level List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //MessageBox.Show(ex.Message);
-                    }
-                    finally
-                    {
-                        connectionDB.connection.Dispose();
+                        refresh();
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                myConn.Close();
+                MessageBox.Show("Unable to remove selected employee level", "Employee Level List Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                myConn.Dispose();
+            }            
         }
 
         private void refreshLbl_Click(object sender, EventArgs e)

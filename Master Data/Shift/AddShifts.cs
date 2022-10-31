@@ -10,8 +10,10 @@ namespace SMTAttendance
     {
         Helper help = new Helper();
         string idUser;
-
         string idshift;
+
+        MySqlConnection myConn;
+
         public AddShifts()
         {
             InitializeComponent();
@@ -37,10 +39,11 @@ namespace SMTAttendance
             }
             else
             {
-                ConnectionDB connectionDB = new ConnectionDB();
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
                 try
                 {
-                    var cmd = new MySqlCommand("", connectionDB.connection);
+                    var cmd = new MySqlCommand("", myConn);
                     string name = tbName.Text;
                     string category = cmbShift.Text;
                     string from = dateTimePickerFrom.Text;
@@ -58,7 +61,7 @@ namespace SMTAttendance
                     mealout = mealout.Remove(mealout.Length - 3);
 
                     string cek = "SELECT * FROM tbl_mastershiftdetail WHERE name = '" + name + "'";
-                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, connectionDB.connection))
+                    using (MySqlDataAdapter adpt = new MySqlDataAdapter(cek, myConn))
                     {
                         DataTable dt = new DataTable();
                         adpt.Fill(dt);
@@ -72,7 +75,7 @@ namespace SMTAttendance
                         }
                         else
                         {
-                            connectionDB.connection.Open();
+                            myConn.Open();
                             string queryAdd = "INSERT INTO tbl_mastershiftdetail (name, category, intime, outtime, createDate, createBy) VALUES " +
                                 "('" + name + "', '" + category + "', '" + from + "', '" + to + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','" + idUser + "')";
 
@@ -129,7 +132,7 @@ namespace SMTAttendance
                                 cmd.ExecuteNonQuery();
                             }
 
-                            connectionDB.connection.Close();
+                            myConn.Close();
                             MessageBox.Show(this, "Shift successfully added", "add shift", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.Close();
                         }
@@ -137,12 +140,12 @@ namespace SMTAttendance
                 }
                 catch (Exception ex)
                 {
-                    connectionDB.connection.Close();
-                    MessageBox.Show(ex.Message.ToString());
+                    myConn.Close();
+                    //MessageBox.Show(ex.Message.ToString());
                 }
                 finally
                 {
-                    connectionDB.connection.Dispose();
+                    myConn.Dispose();
                 }
             }
         }
