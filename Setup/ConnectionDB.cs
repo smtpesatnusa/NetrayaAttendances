@@ -8,10 +8,10 @@ namespace SMTAttendance
     public class ConnectionDB
     {
         MySqlConnection conn;
-        //static string host = "192.168.192.150";
-        //static string database = "pe_aohai";
-        //static string userDB = "smt_developer";
-        //static string password = "w(v97weP8UGe=bYd";
+        //static string host = "localhost";
+        //static string database = "smt_attendance";
+        //static string userDB = "root";
+        //static string password = "MyP4ssw@rd";
 
         static string host = "192.168.192.150";
         static string database = "smt_attendance";
@@ -24,7 +24,7 @@ namespace SMTAttendance
         {
             try
             {
-                strProvider = "server=" + host + ";Database=" + database + ";User ID=" + userDB + ";Password=" + password + ";SslMode=None;Connection Timeout=30";
+                strProvider = "server=" + host + ";Database=" + database + ";User ID=" + userDB + ";Password=" + password + ";SslMode=None;Connection Timeout=30;allowPublicKeyRetrieval=true;";
                 conn = new MySqlConnection(strProvider);
                 conn.Open();
                 return true;

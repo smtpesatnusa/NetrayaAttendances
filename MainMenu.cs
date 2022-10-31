@@ -31,6 +31,8 @@ namespace SMTAttendance
 
         bool sidebarExpand;
 
+        MySqlConnection myConn;
+
         public MainMenu()
         {
             InitializeComponent();
@@ -72,15 +74,31 @@ namespace SMTAttendance
             // to display menu based on user role
             CreateMenu();
 
-            // display data
-            LoadDataOverBreak3Day();
-            LoadDataBreakOK3Day();
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+            try
+            {
+                myConn.Open();
+                // display data
+                LoadDataOverBreak3Day();
+                LoadDataBreakOK3Day();
 
-            // display data to main menu
-            displayData();
+                // display data to main menu
+                displayData();
 
-            // load pie chart
-            LoadPieChart();
+                // load pie chart
+                LoadPieChart();
+            }
+            catch(Exception ex)
+            {
+               
+            }
+            finally
+            {
+                myConn.Dispose();
+            }
+
+           
 
             timerRefresh.Start();
         }
@@ -221,42 +239,74 @@ namespace SMTAttendance
 
         private void displayData()
         {
-            // get total ontime
-            string queryTotalOntime = "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
-                "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
-                "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
-                "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' " +
-                "AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime') AS A";
+            try
+            {
+                
+                string queryTotalOntime = "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
+                    "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
+                    "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
+                    "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' " +
+                    "AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime') AS A";
 
-            help.resultQuery(queryTotalOntime, totalOntime, "total");
 
-            // get total late
-            string queryTotalLate =
-                "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
-                "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
-                "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
-                "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' " +
-                "AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late') AS A";
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryTotalOntime, myConn))
+                {
+                    DataTable dt = new DataTable();
+                    adpt.Fill(dt);
 
-            help.resultQuery(queryTotalLate, totalLate, "total");
+                    if (dt.Rows.Count > 0)
+                    {
+                        totalOntime.Text = dt.Rows[0]["total"].ToString();
+                    }
+                }
 
-            totalOver.Text = over1;
+                //help.resultQuery(queryTotalOntime, totalOntime, "total");
 
-            fillChart();
+                // get total late
+                string queryTotalLate =
+                    "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
+                    "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
+                    "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
+                    "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' " +
+                    "AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late') AS A";
 
-            // load data late in datagridview c#
-            LoadDataLate();
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryTotalLate, myConn))
+                {
+                    DataTable dt = new DataTable();
+                    adpt.Fill(dt);
 
-            // load data break > 3 in datagridview c#
-            LoadDataBreakTime();
+                    if (dt.Rows.Count > 0)
+                    {
+                        totalLate.Text = dt.Rows[0]["total"].ToString();
+                    }
+                }
+
+                //help.resultQuery(queryTotalLate, totalLate, "total");
+
+                totalOver.Text = over1;
+
+                fillChart();
+
+                // load data late in datagridview c#
+                LoadDataLate();
+
+                // load data break > 3 in datagridview c#
+                LoadDataBreakTime();
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("displayData: " + ex.Message);
+            }
+
+
+
+
         }
 
         private void LoadDataLate3Day()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {
-
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE  FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
                     "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
@@ -273,33 +323,42 @@ namespace SMTAttendance
                     "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL " +
                     "ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late') AS A";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataTable dt = new DataTable();
                     adpt.Fill(dt);
                     if (dt.Rows.Count > 0)
                     {
-                        late3 = dt.Rows[0]["total"].ToString();
-                        late2 = dt.Rows[1]["total"].ToString();
-                        late1 = dt.Rows[2]["total"].ToString();
+                        int r = dt.Rows.Count;
+                        if (r > 0)
+                        {
+                            late3 = dt.Rows[0]["total"].ToString();
+                        }
+                        if (r > 1)
+                        {
+                            late2 = dt.Rows[1]["total"].ToString();
+                        }
+
+                        if (r > 2)
+                        {
+                            late1 = dt.Rows[2]["total"].ToString();
+                        }
+
+
+
                     }
                 }
-
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("LoadDataLate3Day: " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+            
         }
 
         private void LoadDataOntime3Day()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            
             try
             {
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE  FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
@@ -318,71 +377,91 @@ namespace SMTAttendance
                     "FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL " +
                     "ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime') AS A";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataTable dt = new DataTable();
                     adpt.Fill(dt);
                     if (dt.Rows.Count > 0)
                     {
-                        ontime3 = dt.Rows[0]["total"].ToString();
-                        ontime2 = dt.Rows[1]["total"].ToString();
-                        ontime1 = dt.Rows[2]["total"].ToString();
+                        int r = dt.Rows.Count;
+                        if (r > 0)
+                        {
+                            ontime3 = dt.Rows[0]["total"].ToString();
+                        }
+                        if (r > 1)
+                        {
+                            ontime2 = dt.Rows[1]["total"].ToString();
+                        }
+
+                        if (r > 2)
+                        {
+                            ontime1 = dt.Rows[2]["total"].ToString();
+                        }
+                        
+                        
+                        
                     }
                 }
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("LoadDataOntime3Day: " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+            
         }
 
         private void LoadDataOverBreak3Day()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {
+               
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE FROM (SELECT b.badgeId, b.name, " +
-                    "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt3 + "' AND b.dept = '" + dept + "' " +
-                    "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 UNION " +
-                    "SELECT COUNT(*)AS total, '" + dt2 + "' AS DATE FROM(SELECT b.badgeId, b.name, " +
-                    "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt2 + "' AND b.dept = '" + dept + "' " +
-                    "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 UNION SELECT COUNT(*)AS total, '" + dateNow + "' AS DATE FROM(SELECT b.badgeId, b.name, " +
-                    "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dateNow + "' AND b.dept = '" + dept + "'" +
-                    " GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90";
-                    
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt3 + "' AND b.dept = '" + dept + "' " +
+                "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 UNION " +
+                "SELECT COUNT(*)AS total, '" + dt2 + "' AS DATE FROM(SELECT b.badgeId, b.name, " +
+                "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt2 + "' AND b.dept = '" + dept + "' " +
+                "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 UNION SELECT COUNT(*)AS total, '" + dateNow + "' AS DATE FROM(SELECT b.badgeId, b.name, " +
+                "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dateNow + "' AND b.dept = '" + dept + "'" +
+                " GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90";
+
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataTable dt = new DataTable();
                     adpt.Fill(dt);
                     if (dt.Rows.Count > 0)
                     {
-                        over3 = dt.Rows[0]["total"].ToString();
-                        over2 = dt.Rows[1]["total"].ToString();
-                        over1 = dt.Rows[2]["total"].ToString();
+                        int r = dt.Rows.Count;
+                        if (r > 0)
+                        {
+                            over3 = dt.Rows[0]["total"].ToString();
+                        }
+
+                        if (r > 1)
+                        {
+                            over2 = dt.Rows[1]["total"].ToString();
+                        }
+
+                        if (r > 2)
+                        {
+                            over1 = dt.Rows[2]["total"].ToString();
+                        }
+
+
                     }
                 }
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show("LoadDataOverBreak3Day: " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+
         }
 
         private void LoadDataBreakOK3Day()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
             try
             {
+                
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE FROM (SELECT b.badgeId, b.name, " +
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt3 + "' AND b.dept = '" + dept + "' " +
                     "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak <= 90 UNION " +
@@ -392,39 +471,48 @@ namespace SMTAttendance
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dateNow + "' AND b.dept = '" + dept + "'" +
                     " GROUP BY b.badgeId, b.name) AS a WHERE totalbreak <= 90";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataTable dt = new DataTable();
                     adpt.Fill(dt);
                     if (dt.Rows.Count > 0)
                     {
-                        break3 = dt.Rows[0]["total"].ToString();
-                        break2 = dt.Rows[1]["total"].ToString();
-                        break1 = dt.Rows[2]["total"].ToString();
+                        int r = dt.Rows.Count;
+                        if (r > 0)
+                        {
+                            break3 = dt.Rows[0]["total"].ToString();
+                        }
+                        if (r > 1)
+                        {
+                            break2 = dt.Rows[1]["total"].ToString();
+                        }
+                        if (r > 2)
+                        {
+                            break1 = dt.Rows[2]["total"].ToString();
+                        }
+
                     }
                 }
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show("LoadDataBreakOK3Day: " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+
+
+
         }
 
         private void LoadDataLate()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            
             try
             {
-                string query = "(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
+                string query = "(SELECT linecode, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     "DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
-                    "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateNow + "' AND e.linecode=f.name AND a.DayType = 'WorkDay' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime desc)"; 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                    "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
+                    "AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime desc)"; 
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -433,26 +521,23 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+                
+                //MessageBox.Show("LoadDataLate; " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+           
         }
 
         // to display breaktime more than 60
         private void LoadDataBreakTime()
         {
-            ConnectionDB connectionDB = new ConnectionDB();
+            
             try
             {
                 string query = "SELECT badgeid, NAME, totalbreak FROM (SELECT b.badgeId, b.name," +
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dateNow + "' " +
                     "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
 
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, connectionDB.connection))
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
                     adpt.Fill(dset);
@@ -468,13 +553,10 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                connectionDB.connection.Close();
-                MessageBox.Show(ex.Message);
+               
+                //MessageBox.Show("LoadDataBreakTime: " + ex.Message);
             }
-            finally
-            {
-                connectionDB.connection.Dispose();
-            }
+            
         }
 
 
@@ -816,53 +898,77 @@ namespace SMTAttendance
         {
             //sendEmail();
 
-            dateLabel.Text = DateTime.Now.ToString("dddd, dd MMMM yyyy");
-
-            // remove data in datagridview result
-            dataGridViewLate.DataSource = null;
-            dataGridViewLate.Refresh();
-
-            while (dataGridViewLate.Columns.Count > 0)
+            string koneksi = ConnectionDB.strProvider;
+            myConn = new MySqlConnection(koneksi);
+            try
             {
-                dataGridViewLate.Columns.RemoveAt(0);
+                myConn.Open();
+
+                dateLabel.Text = DateTime.Now.ToString("dddd, dd MMMM yyyy");
+
+                // remove data in datagridview result
+                this.dataGridViewLate.DoubleBuffered(true);
+                dataGridViewLate.DataSource = null;
+                dataGridViewLate.Refresh();
+
+                while (dataGridViewLate.Columns.Count > 0)
+                {
+                    dataGridViewLate.Columns.RemoveAt(0);
+                }
+
+                dataGridViewLate.Update();
+                dataGridViewLate.Refresh();
+
+                this.dataGridViewBreak.DoubleBuffered(true);
+                dataGridViewBreak.DataSource = null;
+                dataGridViewBreak.Refresh();
+
+                while (dataGridViewBreak.Columns.Count > 0)
+                {
+                    dataGridViewBreak.Columns.RemoveAt(0);
+                }
+
+                dataGridViewBreak.Update();
+                dataGridViewBreak.Refresh();
+
+                // remove chart
+                chartAttendance.Series["Ontime"].Points.Clear();
+                chartAttendance.Series["Late"].Points.Clear();
+                chartAttendance.Series["Over Break"].Points.Clear();
+
+                //chart title  
+                chartAttendance.Titles.Clear();
+
+                // remove chart
+                chartBreak.Series["Ontime"].Points.Clear();
+                chartBreak.Series["Over Break"].Points.Clear();
+
+                //chart title  
+                chartBreak.Titles.Clear();
+
+                displayData();
+                LoadPieChart();
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                myConn.Dispose();
             }
 
-            dataGridViewLate.Update();
-            dataGridViewLate.Refresh();
-
-            dataGridViewBreak.DataSource = null;
-            dataGridViewBreak.Refresh();
-
-            while (dataGridViewBreak.Columns.Count > 0)
-            {
-                dataGridViewBreak.Columns.RemoveAt(0);
-            }
-
-            dataGridViewBreak.Update();
-            dataGridViewBreak.Refresh();
-
-            // remove chart
-            chartAttendance.Series["Ontime"].Points.Clear();
-            chartAttendance.Series["Late"].Points.Clear();
-            chartAttendance.Series["Over Break"].Points.Clear();
-
-            //chart title  
-            chartAttendance.Titles.Clear();
-
-            // remove chart
-            chartBreak.Series["Ontime"].Points.Clear();
-            chartBreak.Series["Over Break"].Points.Clear();
-
-            //chart title  
-            chartBreak.Titles.Clear();
-
-            displayData();
-            LoadPieChart();
+            
         }
 
         private void timerRefresh_Tick(object sender, EventArgs e)
         {
+            timerRefresh.Stop();
             refresh();
+
+            timerRefresh.Start();
+           
         }
 
         private void dataGridViewTotalBreak_CellContentClick(object sender, DataGridViewCellEventArgs e)
