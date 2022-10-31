@@ -203,7 +203,7 @@ namespace SMTAttendance
                 var body = "Email body";
 
                 var username = "yunindafaranika@gmail.com"; // get from Mailtrap
-                var password = "@Luphu4ever"; // get from Mailtrap
+                var password = "Password"; // get from Mailtrap
 
                 var host = "smtp.gmail.com";
                 var port = 587;
