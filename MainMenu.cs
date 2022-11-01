@@ -487,10 +487,12 @@ namespace SMTAttendance
         {            
             try
             {
-                string query = "(SELECT linecode, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
-                    "DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
-                    "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime desc)"; 
+                string query = "(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, " +
+                    "f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
+                    "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, " +
+                    "'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
+                    "AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
+                    "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)"; 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -511,10 +513,10 @@ namespace SMTAttendance
             
             try
             {
-                string query = "SELECT badgeid, NAME, totalbreak FROM (SELECT b.badgeId, b.name," +
-                    "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dateNow + "' " +
-                    "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
-
+                string query = "SELECT linecode, DESCRIPTION AS section, badgeid,NAME, totalbreak FROM (SELECT b.linecode, c.description, b.badgeId, b.name, " +
+                    "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b, tbl_masterlinecode c WHERE a.emplid = b.id AND b.linecode = c.name " +
+                    "AND a.date = '" + dateNow + "' GROUP BY b.linecode, c.description ,b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
+                    
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -950,32 +952,25 @@ namespace SMTAttendance
         {
             int i;
             i = dataGridViewBreak.SelectedCells[0].RowIndex;
-            string badgeslctd = dataGridViewBreak.Rows[i].Cells[0].Value.ToString();
-            string employeeslctd = dataGridViewBreak.Rows[i].Cells[1].Value.ToString();
-            string totalBreak = dataGridViewBreak.Rows[i].Cells[2].Value.ToString();
+            string badgeslctd = dataGridViewBreak.Rows[i].Cells[2].Value.ToString();
+            string employeeslctd = dataGridViewBreak.Rows[i].Cells[3].Value.ToString();
+            string totalBreak = dataGridViewBreak.Rows[i].Cells[4].Value.ToString();
 
-            if (e.ColumnIndex == 3)
+            if (e.ColumnIndex == 5)
             {
                 DetailPosition detailPosition = new DetailPosition();
                 detailPosition.tbBadge.Text = badgeslctd;
                 detailPosition.tbName.Text = employeeslctd;
                 detailPosition.tbDate.Text = dateNow;
-                detailPosition.Show();
                 detailPosition.tabControl1.SelectedIndex = 1;
-
-                //DetailBreak detailBreak = new DetailBreak();
-                //detailBreak.tbBadge.Text = badgeslctd;
-                //detailBreak.tbName.Text = employeeslctd;
-                //detailBreak.tbTotalBreak.Text = totalBreak;
-
-                //detailBreak.ShowDialog();
+                detailPosition.ShowDialog();
             }
         }
 
         private void dataGridViewTotalBreak_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Set table title
-            string[] title = { "Badge ID", "Name", "Total Break (minute)" };
+            string[] title = { "Line Code", "Section",  "Badge ID", "Name", "Total Break (minute)" };
             for (int i = 0; i < title.Length; i++)
             {
                 dataGridViewBreak.Columns[i].HeaderText = "" + title[i];
