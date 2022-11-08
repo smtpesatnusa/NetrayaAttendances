@@ -24,7 +24,8 @@ namespace SMTAttendance
         {
             try
             {
-                strProvider = "server=" + host + ";Database=" + database + ";User ID=" + userDB + ";Password=" + password + ";SslMode=None;Connection Timeout=30;allowPublicKeyRetrieval=true;";
+                strProvider = "server=" + host + ";Database=" + database + ";User ID=" + userDB + ";Password=" + password + ";SslMode=None;Connection Timeout=30;";
+                //strProvider = "server=" + host + ";Database=" + database + ";User ID=" + userDB + ";Password=" + password + ";SslMode=None;Connection Timeout=30;allowPublicKeyRetrieval=true;";
                 conn = new MySqlConnection(strProvider);
                 conn.Open();
                 return true;

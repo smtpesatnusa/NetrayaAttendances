@@ -199,13 +199,13 @@ namespace SMTAttendance
 
                 if (dept == "All")
                 {
-                     Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
-                        "ON e.rfidno = l.rfidno WHERE (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "') ORDER BY l.id DESC";
+                    Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
+                       "ON e.rfidno = l.rfidno WHERE (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "') ORDER BY l.id DESC";
                 }
                 else
                 {
                     Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
-                        "ON e.rfidno = l.rfidno WHERE e.dept = '" + dept + "' AND (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "') ORDER BY l.id DESC"; 
+                        "ON e.rfidno = l.rfidno WHERE e.dept = '" + dept + "' AND (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "') ORDER BY l.id DESC";
                 }
 
                 StartProgress("Loading...");
@@ -382,40 +382,37 @@ namespace SMTAttendance
         {
             try
             {
-                if (dataGridViewLogEmployeeList.Rows.Count > 0)
-                {
-                    string search = tbSearch.Text.Replace("'", "''");
-                    DateTime dt1 = dtBegin.Value;
-                    DateTime dt2 = dtEnd.Value;
-                    dt2 = dt2.AddDays(1).AddSeconds(-1);
+                string search = tbSearch.Text.Replace("'", "''");
+                DateTime dt1 = dtBegin.Value;
+                DateTime dt2 = dtEnd.Value;
+                dt2 = dt2.AddDays(1).AddSeconds(-1);
 
-                    if (tbSearch.Text == "")
+                if (tbSearch.Text == "")
+                {
+                    loadData();
+                }
+                else
+                {
+                    if (dept == "All")
                     {
-                        loadData();
+                        Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
+                    "ON e.rfidno = l.rfidno WHERE (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "')" +
+                    "AND (e.badgeid LIKE '%" + search + "%' OR l.rfidno LIKE '%" + search + "%' OR e.name LIKE '%" + search + "%' OR e.workarea LIKE '%" + search + "%' " +
+                    "OR l.ipDevice LIKE '%" + search + "%' OR l.indicator LIKE '%" + search + "%' OR l.timelog LIKE '%" + search + "%' OR l.processed LIKE '%" + search + "%') order by l.id desc";
                     }
                     else
                     {
-                        if (dept == "All")
-                        {
-                            Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
-                        "ON e.rfidno = l.rfidno WHERE (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "')" +
-                        "AND (e.badgeid LIKE '%" + search + "%' OR l.rfidno LIKE '%" + search + "%' OR e.name LIKE '%" + search + "%' OR e.workarea LIKE '%" + search + "%' " +
-                        "OR l.ipDevice LIKE '%" + search + "%' OR l.indicator LIKE '%" + search + "%' OR l.timelog LIKE '%" + search + "%' OR l.processed LIKE '%" + search + "%') order by l.id desc";
-                        }
-                        else
-                        {
-                            Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
-                        "ON e.rfidno = l.rfidno WHERE e.dept = '" + dept + "' AND (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "')"+
-                        "AND (e.badgeid LIKE '%" + search + "%' OR l.rfidno LIKE '%" + search + "%' OR e.name LIKE '%" + search + "%' OR e.workarea LIKE '%" + search + "%' " +
-                        "OR l.ipDevice LIKE '%" + search + "%' OR l.indicator LIKE '%" + search + "%' OR l.timelog LIKE '%" + search + "%' OR l.processed LIKE '%" + search + "%') order by l.id desc";
+                        Sql = "SELECT e.badgeid, e.name, e.workarea, l.ipDevice, l.indicator, l.timelog, l.processed FROM tbl_log AS l INNER JOIN tbl_employee AS e " +
+                    "ON e.rfidno = l.rfidno WHERE e.dept = '" + dept + "' AND (l.timelog between '" + dt1.ToString("yyyy-MM-dd") + "' and '" + dt2.ToString("yyyy-MM-dd") + "')" +
+                    "AND (e.badgeid LIKE '%" + search + "%' OR l.rfidno LIKE '%" + search + "%' OR e.name LIKE '%" + search + "%' OR e.workarea LIKE '%" + search + "%' " +
+                    "OR l.ipDevice LIKE '%" + search + "%' OR l.indicator LIKE '%" + search + "%' OR l.timelog LIKE '%" + search + "%' OR l.processed LIKE '%" + search + "%') order by l.id desc";
 
-                        }
+                    }
 
-                        LoadDS(Sql);
-                        FillGrid();
-                        totalLbl.Text = dtSource.Rows.Count.ToString();
-                    }                    
-                }                
+                    LoadDS(Sql);
+                    FillGrid();
+                    totalLbl.Text = dtSource.Rows.Count.ToString();
+                }
             }
             catch (Exception ex)
             {

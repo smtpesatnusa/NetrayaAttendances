@@ -41,13 +41,6 @@ namespace SMTAttendance
             dateSchdule = dt.ToString("yyyy-MM-dd");
         }
 
-        private void addBtn_Click(object sender, EventArgs e)
-        {
-            SelectedGroupEmployee selectedGroupEmployee = new SelectedGroupEmployee();
-            selectedGroupEmployee.ShowDialog();
-        }
-
-
         private void submitBtn_Click(object sender, EventArgs e)
         {
             string koneksi = ConnectionDB.strProvider;

@@ -5,8 +5,6 @@ using System.Data;
 using System;
 using System.Drawing;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Net.Mail;
-using System.Net;
 
 namespace SMTAttendance
 {
@@ -15,13 +13,10 @@ namespace SMTAttendance
         readonly Helper help = new Helper();
 
         string idUser, dept;
-        string dateNow = DateTime.Now.ToString("yyyy-MM-dd");
-
-        // date
-        string dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
-        string dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+        string dateNow, dt2, dt3;
 
         string totalLessBreak, totalOverBreak;
+        string lateTotal;
 
         string late3, late2, late1;
         string ontime3, ontime2, ontime1;
@@ -29,7 +24,6 @@ namespace SMTAttendance
         string break3, break2, break1;
 
         bool sidebarExpand;
-
         MySqlConnection myConn;
 
         public MainMenu()
@@ -85,17 +79,20 @@ namespace SMTAttendance
                 // display data to main menu
                 displayData();
 
-                // load pie chart
+                // load chart
+                LoadChart();
+
+                //load pie chart
                 LoadPieChart();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-               
+                myConn.Close();
             }
             finally
             {
                 myConn.Dispose();
-            }           
+            }
 
             timerRefresh.Start();
         }
@@ -134,7 +131,7 @@ namespace SMTAttendance
         }
 
 
-        private void LoadPieChart()
+        private void LoadChart()
         {
             LoadDataOverBreak3Day();
             LoadDataBreakOK3Day();
@@ -151,89 +148,106 @@ namespace SMTAttendance
             chartBreak.Series["Over Break"].IsValueShownAsLabel = true;
 
             //chart title  
-            chartBreak.Titles.Add("Break Time Summary");
+            Title title = new Title();
+            title.Font = new Font("Microsoft Sans Serif", 14, FontStyle.Bold);
+            title.ForeColor = System.Drawing.Color.FromArgb(64, 64, 64);
+            title.Text = "Break Time Summary";
+            chartBreak.Titles.Add(title);
 
             chartBreak.Series["Ontime"].ChartType = SeriesChartType.Column;
             chartBreak.Series["Over Break"].ChartType = SeriesChartType.Column;
         }
 
-
-        //void LoadPieChart()
-        //{
-        //    chartBreak.Series.Clear();
-        //    chartBreak.Titles.Clear();
-        //    chartBreak.Palette = ChartColorPalette.Fire;
-        //    chartBreak.Titles.Add("Break Time Summary");
-        //    chartBreak.ChartAreas[0].BackColor = Color.Transparent;
-        //    Series series1 = new Series
-        //    {
-        //        Name = "series1",
-        //        IsVisibleInLegend = true,
-        //        Color = Color.Green,
-        //        ChartType = SeriesChartType.Doughnut
-        //    };
-        //    chartBreak.Series.Add(series1);
-        //    series1.Points.Add(Convert.ToInt32(break1));
-        //    series1.Points.Add(Convert.ToInt32(over1));
-        //    var p1 = series1.Points[0];
-        //    p1.AxisLabel = break1;
-        //    p1.LegendText = "Break less than 80 min";
-        //    p1.Color = Color.ForestGreen;
-        //    var p2 = series1.Points[1];
-        //    p2.AxisLabel = over1;
-        //    p2.LegendText = "Break more than 80 min";
-        //    p2.Color = Color.Crimson;
-        //    chartBreak.Invalidate();
-        //    //pnlPie.Controls.Add(pieChart);
-        //}
-
-
-        private void sendEmail()
+        void LoadPieChart()
         {
             try
-            {              
-                var from = new MailAddress("yunindafaranika@gmail.com");
-                var to = new MailAddress("yunindafaranika@gmail.com");
-                var subject = "Email with attachment";
-                var body = "Email body";
+            {
+                string koneksi = ConnectionDB.strProvider;
+                myConn = new MySqlConnection(koneksi);
 
-                var username = "yunindafaranika@gmail.com"; // get from Mailtrap
-                var password = "Password"; // get from Mailtrap
+                LatePiechart.Series.Clear();
+                LatePiechart.Titles.Clear();
 
-                var host = "smtp.gmail.com";
-                var port = 587;
+                //chart title  
+                Title title = new Title();
+                title.Font = new Font("Microsoft Sans Serif", 12, FontStyle.Bold);
+                title.ForeColor = Color.FromArgb(64, 64, 64);
+                title.Text = "Late Summary Per Section\r\n" + totalLate.Text + " Pax";
+                LatePiechart.Titles.Add(title);
 
-                var client = new SmtpClient(host, port);
-                client.Credentials = new NetworkCredential(username, password);
-                client.EnableSsl = true;
+                LatePiechart.ChartAreas[0].BackColor = Color.Transparent;
+                Series series1 = new Series
+                {
+                    Name = "series1",
+                    IsVisibleInLegend = true,
+                    Color = Color.Green,
+                    ChartType = SeriesChartType.Doughnut
+                };
 
-                var mail = new MailMessage();
-                mail.Subject = subject;
-                mail.From = from;
-                mail.To.Add(to);
-                mail.Body = body;
+                LatePiechart.Series.Add(series1);
 
-                //var attachment = new Attachment("\\\\192.168.192.254\\SystemSupport\\Attendance-SMT\\13-10-2022\\Summary.xlsx");
-                //mail.Attachments.Add(attachment);
+                //query to get data late each section
+                string query = "(SELECT DESCRIPTION AS section, COUNT(*) AS total FROM (SELECT e.linecode, " +
+                    "f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut," +
+                    "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn," +
+                    "'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
+                    "AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
+                    "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' GROUP BY section ORDER BY total DESC)";
 
-                client.Send(mail);
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
+                {
+                    DataTable dt = new DataTable();
+                    adpt.Fill(dt);
 
-                Console.WriteLine("Email sent");
+                    if (dt.Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            series1.Label = "#PERCENT{P0}";
+                            series1.Points.Add(Convert.ToInt32(dt.Rows[i]["total"]));
+                            //series1.Points[i].AxisLabel = "0.5";
+                            series1.Points[i].LegendText = dt.Rows[i]["section"].ToString();
+                        }
+                    }
+                }
+
+                // SET COLOR BASED ON SECTION
+                foreach (Series charts in LatePiechart.Series)
+                {
+                    foreach (DataPoint point in charts.Points)
+                    {
+                        switch (point.LegendText)
+                        {
+                            case "PROD": point.Color = Color.DeepSkyBlue; break;
+                            case "PE": point.Color = Color.Blue; break;
+                            case "MGR": point.Color = Color.Gray; break;
+                            case "ENG": point.Color = Color.LightSeaGreen; break;
+                            case "PC": point.Color = Color.MediumPurple; break;
+                            case "QC": point.Color = Color.HotPink; break;
+                            case "STORE": point.Color = Color.Salmon; break;
+                        }
+                    }
+                }
+                LatePiechart.ChartAreas["ChartArea1"].Area3DStyle.Enable3D = true;
+
             }
             catch (Exception ex)
             {
-                //MessageBox.Show(ex.Message);
+                myConn.Close();
             }
             finally
             {
+                myConn.Dispose();
             }
         }
 
 
         private void displayData()
         {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
             try
-            {                
+            {
                 string queryTotalOntime = "SELECT COUNT(*)AS total FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
                     "(SELECT a.EmplID, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus " +
@@ -268,12 +282,26 @@ namespace SMTAttendance
 
                     if (dt.Rows.Count > 0)
                     {
-                        totalLate.Text = dt.Rows[0]["total"].ToString();
+                        lateTotal = dt.Rows[0]["total"].ToString();
+                        totalLate.Text = lateTotal;
+                    }
+                }
+
+                // get total employee
+                string queryTotalEmployee ="SELECT COUNT(*) AS total FROM tbl_employee WHERE dept = '"+dept+"'";
+
+                using (MySqlDataAdapter adpt = new MySqlDataAdapter(queryTotalEmployee, myConn))
+                {
+                    DataTable dt = new DataTable();
+                    adpt.Fill(dt);
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        totalEmployee.Text = dt.Rows[0]["total"].ToString();
                     }
                 }
 
                 //help.resultQuery(queryTotalLate, totalLate, "total");
-
                 totalOver.Text = over1;
 
                 fillChart();
@@ -283,6 +311,9 @@ namespace SMTAttendance
 
                 // load data break > 3 in datagridview c#
                 LoadDataBreakTime();
+
+                //// load data 
+                //LoadDataAttendance();
             }
             catch (Exception ex)
             {
@@ -292,6 +323,10 @@ namespace SMTAttendance
 
         private void LoadDataLate3Day()
         {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+            dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+
             try
             {
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE  FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
@@ -333,15 +368,19 @@ namespace SMTAttendance
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //MessageBox.Show("LoadDataLate3Day: " + ex.Message);
             }
-            
+
         }
 
         private void LoadDataOntime3Day()
-        {            
+        {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+            dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+
             try
             {
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE  FROM (SELECT EmplID, NAME, ScheduleIn, ScheduleOut, intime, outtime, Sttus FROM " +
@@ -375,29 +414,28 @@ namespace SMTAttendance
                         {
                             ontime2 = dt.Rows[1]["total"].ToString();
                         }
-
                         if (r > 2)
                         {
                             ontime1 = dt.Rows[2]["total"].ToString();
                         }
-                        
-                        
-                        
                     }
                 }
             }
             catch (Exception ex)
             {
-               //MessageBox.Show("LoadDataOntime3Day: " + ex.Message);
+                //MessageBox.Show("LoadDataOntime3Day: " + ex.Message);
             }
-            
+
         }
 
         private void LoadDataOverBreak3Day()
         {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+            dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+
             try
             {
-               
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE FROM (SELECT b.badgeId, b.name, " +
                 "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt3 + "' AND b.dept = '" + dept + "' " +
                 "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak > 90 UNION " +
@@ -442,9 +480,12 @@ namespace SMTAttendance
 
         private void LoadDataBreakOK3Day()
         {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+            dt2 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            dt3 = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd");
+
             try
             {
-                
                 string query = "SELECT COUNT(*)AS total, '" + dt3 + "' AS DATE FROM (SELECT b.badgeId, b.name, " +
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b WHERE a.emplid = b.id AND a.date = '" + dt3 + "' AND b.dept = '" + dept + "' " +
                     "GROUP BY b.badgeId, b.name) AS a WHERE totalbreak <= 90 UNION " +
@@ -484,7 +525,9 @@ namespace SMTAttendance
         }
 
         private void LoadDataLate()
-        {            
+        {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
             try
             {
                 string query = "(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, " +
@@ -492,7 +535,7 @@ namespace SMTAttendance
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, " +
                     "'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
                     "AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
-                    "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)"; 
+                    "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)";
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -502,21 +545,21 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-                
                 //MessageBox.Show("LoadDataLate; " + ex.Message);
-            }           
+            }
         }
 
         // to display breaktime more than 60
         private void LoadDataBreakTime()
         {
-            
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
             try
             {
                 string query = "SELECT linecode, DESCRIPTION AS section, badgeid,NAME, totalbreak FROM (SELECT b.linecode, c.description, b.badgeId, b.name, " +
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b, tbl_masterlinecode c WHERE a.emplid = b.id AND b.linecode = c.name " +
                     "AND a.date = '" + dateNow + "' GROUP BY b.linecode, c.description ,b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
-                    
+
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -533,11 +576,40 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-               
+
                 //MessageBox.Show("LoadDataBreakTime: " + ex.Message);
             }
-            
+
         }
+
+        //private void LoadDataAttendance()
+        //{
+        //    dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
+        //    try
+        //    {
+        //        string query = "SELECT linecode, DESCRIPTION AS section, NAME, totalEarly FROM (SELECT e.name, e.linecode, f.description,TIMESTAMPDIFF(MINUTE, a.intime, a.ScheduleIn) AS totalEarly, " +
+        //            "F(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid AND e.linecode = f.name " +
+        //            "AND e.dept = 'SMT' AND a.date = '2022-11-02' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY totalEarly DESC";                    
+                    
+        //            //"(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, " +
+        //            //"f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
+        //            //"DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, " +
+        //            //"'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
+        //            //"AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
+        //            //"IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)";
+        //        using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
+        //        {
+        //            DataSet dset = new DataSet();
+        //            adpt.Fill(dset);
+        //            dataGridView1.DataSource = dset.Tables[0];
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //MessageBox.Show("LoadDataLate; " + ex.Message);
+        //    }
+        //}
 
 
         //fillChart method  
@@ -563,7 +635,11 @@ namespace SMTAttendance
             chartAttendance.Series["Over Break"].IsValueShownAsLabel = true;
 
             //chart title  
-            chartAttendance.Titles.Add("Attendances Summary");         
+            Title title = new Title();
+            title.Font = new Font("Microsoft Sans Serif", 14, FontStyle.Bold);
+            title.ForeColor = Color.FromArgb(64, 64, 64);
+            title.Text = "Attendances Summary";
+            chartAttendance.Titles.Add(title);
         }
 
 
@@ -925,7 +1001,10 @@ namespace SMTAttendance
                 //chart title  
                 chartBreak.Titles.Clear();
 
+                LatePiechart.Series["series1"].Points.Clear();
+
                 displayData();
+                LoadChart();
                 LoadPieChart();
 
             }
@@ -936,7 +1015,7 @@ namespace SMTAttendance
             finally
             {
                 myConn.Dispose();
-            }            
+            }
         }
 
         private void timerRefresh_Tick(object sender, EventArgs e)
@@ -945,11 +1024,13 @@ namespace SMTAttendance
             refresh();
 
             timerRefresh.Start();
-           
+
         }
 
         private void dataGridViewTotalBreak_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+
             int i;
             i = dataGridViewBreak.SelectedCells[0].RowIndex;
             string badgeslctd = dataGridViewBreak.Rows[i].Cells[2].Value.ToString();
@@ -970,7 +1051,7 @@ namespace SMTAttendance
         private void dataGridViewTotalBreak_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Set table title
-            string[] title = { "Line Code", "Section",  "Badge ID", "Name", "Total Break (minute)" };
+            string[] title = { "Line Code", "Section", "Badge ID", "Name", "Total Break (minute)" };
             for (int i = 0; i < title.Length; i++)
             {
                 dataGridViewBreak.Columns[i].HeaderText = "" + title[i];
@@ -1006,7 +1087,6 @@ namespace SMTAttendance
             panel8.BackColor = System.Drawing.Color.FromArgb(63, 81, 181);
             panel8.ForeColor = System.Drawing.Color.White;
             hideSubMenu();
-
         }
 
         private void buttonSchedule_Click(object sender, EventArgs e)
@@ -1094,6 +1174,42 @@ namespace SMTAttendance
             sidebarTimer.Start();
         }
 
+        private void totalEmployee_Click(object sender, EventArgs e)
+        {
+            Employeelist employeelist = new Employeelist();
+            employeelist.toolStripUsername.Text = toolStripUsername.Text;
+            employeelist.userdetail.Text = userdetail.Text;
+            employeelist.Show();
+            this.Hide();
+        }
+
+        private void dataGridViewLate_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (this.dataGridViewLate.SelectedRows.Count > 0)
+            {
+                int i;
+                i = dataGridViewLate.SelectedCells[0].RowIndex;
+                string linecodeslctd = dataGridViewLate.Rows[i].Cells[0].Value.ToString();
+                string sectionslctd = dataGridViewLate.Rows[i].Cells[1].Value.ToString();
+                string nameslctd = dataGridViewLate.Rows[i].Cells[2].Value.ToString();
+                string scheduleInslctd = dataGridViewLate.Rows[i].Cells[3].Value.ToString();
+                string scheduleOutslctd = dataGridViewLate.Rows[i].Cells[4].Value.ToString();
+
+                // convert date format
+                string _Date = dateLabel.Text;
+                DateTime dt = Convert.ToDateTime(_Date);
+
+                EditAttendance editAttendance = new EditAttendance();
+                editAttendance.userdetail.Text = userdetail.Text;
+                editAttendance.tbDateSchedule.Text = dt.ToString("yyyy-MM-dd");
+                editAttendance.tbLineCode.Text = linecodeslctd;
+                editAttendance.tbSection.Text = sectionslctd;
+                editAttendance.tbName.Text = nameslctd;
+//                editAttendance.dateTimePickerIn.Text = intimeslctd;
+                editAttendance.ShowDialog();
+            }
+        }
+
         private void pictureBox10_Click(object sender, EventArgs e)
         {
             sidebarTimer.Start();
@@ -1143,7 +1259,7 @@ namespace SMTAttendance
             leaveApproval.ShowDialog();
         }
 
-        
+
 
         private void sidebarTimer_Tick(object sender, EventArgs e)
         {
@@ -1283,7 +1399,7 @@ namespace SMTAttendance
             }
             catch (Exception ex)
             {
-
+                myConn.Close();
             }
             finally
             {

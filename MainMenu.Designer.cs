@@ -35,11 +35,14 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainMenu));
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.bOMSAPVsLLVsPRoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -131,10 +134,16 @@
             this.label8 = new System.Windows.Forms.Label();
             this.dataGridViewBreak = new System.Windows.Forms.DataGridView();
             this.dateLabel = new System.Windows.Forms.Label();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.chartAttendance = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartBreak = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartAttendance = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.panel14 = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.pictureBox12 = new System.Windows.Forms.PictureBox();
+            this.totalEmployee = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.LatePiechart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.contextMenuStrip.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.sidebar.SuspendLayout();
@@ -169,13 +178,20 @@
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewLate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBreak)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartBreak)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartAttendance)).BeginInit();
+            this.panel14.SuspendLayout();
+            this.panel6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chartAttendance)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.chartBreak)).BeginInit();
-            this.panel14.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LatePiechart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripStatusLabel1
@@ -465,7 +481,7 @@
             this.userdetail});
             this.statusStrip1.Location = new System.Drawing.Point(3, 666);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1381, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(1363, 26);
             this.statusStrip1.TabIndex = 94;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -933,15 +949,15 @@
             this.panel3.Controls.Add(this.pictureBox2);
             this.panel3.Controls.Add(this.totalOntime);
             this.panel3.Controls.Add(this.label6);
-            this.panel3.Location = new System.Drawing.Point(544, 59);
+            this.panel3.Location = new System.Drawing.Point(672, 87);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(192, 154);
+            this.panel3.Size = new System.Drawing.Size(182, 154);
             this.panel3.TabIndex = 278;
             // 
             // pictureBox2
             // 
             this.pictureBox2.Image = global::SMTAttendance.Properties.Resources.icons8_clock_64;
-            this.pictureBox2.Location = new System.Drawing.Point(26, 39);
+            this.pictureBox2.Location = new System.Drawing.Point(17, 39);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(50, 77);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -951,11 +967,11 @@
             // totalOntime
             // 
             this.totalOntime.AutoSize = true;
-            this.totalOntime.Font = new System.Drawing.Font("Modern No. 20", 25.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.totalOntime.Font = new System.Drawing.Font("Modern No. 20", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.totalOntime.ForeColor = System.Drawing.Color.Transparent;
-            this.totalOntime.Location = new System.Drawing.Point(118, 79);
+            this.totalOntime.Location = new System.Drawing.Point(86, 86);
             this.totalOntime.Name = "totalOntime";
-            this.totalOntime.Size = new System.Drawing.Size(41, 45);
+            this.totalOntime.Size = new System.Drawing.Size(35, 40);
             this.totalOntime.TabIndex = 1;
             this.totalOntime.Text = "3";
             this.totalOntime.Click += new System.EventHandler(this.totalOntime_Click);
@@ -965,7 +981,7 @@
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.Color.Transparent;
-            this.label6.Location = new System.Drawing.Point(83, 49);
+            this.label6.Location = new System.Drawing.Point(73, 32);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(95, 25);
             this.label6.TabIndex = 0;
@@ -977,15 +993,15 @@
             this.panel4.Controls.Add(this.pictureBox3);
             this.panel4.Controls.Add(this.totalLate);
             this.panel4.Controls.Add(this.label5);
-            this.panel4.Location = new System.Drawing.Point(751, 59);
+            this.panel4.Location = new System.Drawing.Point(863, 87);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(192, 154);
+            this.panel4.Size = new System.Drawing.Size(182, 154);
             this.panel4.TabIndex = 279;
             // 
             // pictureBox3
             // 
             this.pictureBox3.Image = global::SMTAttendance.Properties.Resources.icons8_i_will_go_64;
-            this.pictureBox3.Location = new System.Drawing.Point(26, 39);
+            this.pictureBox3.Location = new System.Drawing.Point(22, 39);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(50, 77);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -995,11 +1011,11 @@
             // totalLate
             // 
             this.totalLate.AutoSize = true;
-            this.totalLate.Font = new System.Drawing.Font("Modern No. 20", 25.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.totalLate.Font = new System.Drawing.Font("Modern No. 20", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.totalLate.ForeColor = System.Drawing.Color.Transparent;
-            this.totalLate.Location = new System.Drawing.Point(108, 79);
+            this.totalLate.Location = new System.Drawing.Point(93, 86);
             this.totalLate.Name = "totalLate";
-            this.totalLate.Size = new System.Drawing.Size(62, 45);
+            this.totalLate.Size = new System.Drawing.Size(53, 40);
             this.totalLate.TabIndex = 1;
             this.totalLate.Text = "12";
             this.totalLate.Click += new System.EventHandler(this.totalLate_Click);
@@ -1009,7 +1025,7 @@
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.Color.Transparent;
-            this.label5.Location = new System.Drawing.Point(116, 49);
+            this.label5.Location = new System.Drawing.Point(95, 32);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(54, 25);
             this.label5.TabIndex = 0;
@@ -1021,15 +1037,15 @@
             this.panel5.Controls.Add(this.pictureBox4);
             this.panel5.Controls.Add(this.totalOver);
             this.panel5.Controls.Add(this.label3);
-            this.panel5.Location = new System.Drawing.Point(959, 59);
+            this.panel5.Location = new System.Drawing.Point(1054, 87);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(195, 154);
+            this.panel5.Size = new System.Drawing.Size(182, 154);
             this.panel5.TabIndex = 280;
             // 
             // pictureBox4
             // 
             this.pictureBox4.Image = global::SMTAttendance.Properties.Resources.icons8_sand_timer_64;
-            this.pictureBox4.Location = new System.Drawing.Point(23, 39);
+            this.pictureBox4.Location = new System.Drawing.Point(8, 39);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(50, 77);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -1039,11 +1055,11 @@
             // totalOver
             // 
             this.totalOver.AutoSize = true;
-            this.totalOver.Font = new System.Drawing.Font("Modern No. 20", 25.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.totalOver.Font = new System.Drawing.Font("Modern No. 20", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.totalOver.ForeColor = System.Drawing.Color.Transparent;
-            this.totalOver.Location = new System.Drawing.Point(124, 72);
+            this.totalOver.Location = new System.Drawing.Point(73, 86);
             this.totalOver.Name = "totalOver";
-            this.totalOver.Size = new System.Drawing.Size(41, 45);
+            this.totalOver.Size = new System.Drawing.Size(35, 40);
             this.totalOver.TabIndex = 1;
             this.totalOver.Text = "3";
             // 
@@ -1052,7 +1068,7 @@
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Transparent;
-            this.label3.Location = new System.Drawing.Point(71, 49);
+            this.label3.Location = new System.Drawing.Point(61, 32);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(121, 25);
             this.label3.TabIndex = 0;
@@ -1067,7 +1083,7 @@
             this.refreshLbl.Depth = 0;
             this.refreshLbl.HighEmphasis = true;
             this.refreshLbl.Icon = null;
-            this.refreshLbl.Location = new System.Drawing.Point(1221, 13);
+            this.refreshLbl.Location = new System.Drawing.Point(1203, 13);
             this.refreshLbl.Margin = new System.Windows.Forms.Padding(5, 7, 5, 7);
             this.refreshLbl.MouseState = MaterialSkin.MouseState.HOVER;
             this.refreshLbl.Name = "refreshLbl";
@@ -1085,7 +1101,7 @@
             this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer1.Location = new System.Drawing.Point(521, 228);
+            this.splitContainer1.Location = new System.Drawing.Point(480, 266);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -1098,7 +1114,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.label8);
             this.splitContainer1.Panel2.Controls.Add(this.dataGridViewBreak);
-            this.splitContainer1.Size = new System.Drawing.Size(742, 339);
+            this.splitContainer1.Size = new System.Drawing.Size(809, 319);
             this.splitContainer1.SplitterDistance = 175;
             this.splitContainer1.TabIndex = 287;
             // 
@@ -1108,9 +1124,9 @@
             this.label1.Font = new System.Drawing.Font("Modern No. 20", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(16, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(69, 30);
+            this.label1.Size = new System.Drawing.Size(119, 30);
             this.label1.TabIndex = 263;
-            this.label1.Text = "Late";
+            this.label1.Text = "Lateness";
             // 
             // dataGridViewLate
             // 
@@ -1131,14 +1147,15 @@
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridViewLate.DefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridViewLate.Location = new System.Drawing.Point(21, 45);
+            this.dataGridViewLate.Location = new System.Drawing.Point(2, 45);
             this.dataGridViewLate.Name = "dataGridViewLate";
             this.dataGridViewLate.ReadOnly = true;
             this.dataGridViewLate.RowHeadersWidth = 51;
             this.dataGridViewLate.RowTemplate.Height = 40;
             this.dataGridViewLate.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewLate.Size = new System.Drawing.Size(718, 127);
+            this.dataGridViewLate.Size = new System.Drawing.Size(793, 116);
             this.dataGridViewLate.TabIndex = 262;
+            this.dataGridViewLate.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewLate_CellDoubleClick);
             this.dataGridViewLate.Paint += new System.Windows.Forms.PaintEventHandler(this.dataGridViewLate_Paint);
             // 
             // label8
@@ -1170,13 +1187,13 @@
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridViewBreak.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dataGridViewBreak.Location = new System.Drawing.Point(21, 48);
+            this.dataGridViewBreak.Location = new System.Drawing.Point(2, 48);
             this.dataGridViewBreak.Name = "dataGridViewBreak";
             this.dataGridViewBreak.ReadOnly = true;
             this.dataGridViewBreak.RowHeadersWidth = 51;
             this.dataGridViewBreak.RowTemplate.Height = 40;
             this.dataGridViewBreak.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewBreak.Size = new System.Drawing.Size(718, 109);
+            this.dataGridViewBreak.Size = new System.Drawing.Size(793, 89);
             this.dataGridViewBreak.TabIndex = 276;
             this.dataGridViewBreak.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewTotalBreak_CellContentClick);
             this.dataGridViewBreak.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewTotalBreak_CellFormatting);
@@ -1187,89 +1204,70 @@
             this.dateLabel.AutoSize = true;
             this.dateLabel.Font = new System.Drawing.Font("Modern No. 20", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dateLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.dateLabel.Location = new System.Drawing.Point(24, 13);
+            this.dateLabel.Location = new System.Drawing.Point(475, 39);
             this.dateLabel.Name = "dateLabel";
             this.dateLabel.Size = new System.Drawing.Size(94, 40);
             this.dateLabel.TabIndex = 285;
             this.dateLabel.Text = "Date";
             // 
-            // splitContainer2
+            // chartBreak
             // 
-            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer2.Location = new System.Drawing.Point(31, 59);
-            this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer2.Panel1
-            // 
-            this.splitContainer2.Panel1.Controls.Add(this.chartAttendance);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Panel2.Controls.Add(this.chartBreak);
-            this.splitContainer2.Size = new System.Drawing.Size(473, 505);
-            this.splitContainer2.SplitterDistance = 291;
-            this.splitContainer2.TabIndex = 289;
-            // 
-            // chartAttendance
-            // 
-            this.chartAttendance.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             chartArea1.Name = "ChartArea1";
-            this.chartAttendance.ChartAreas.Add(chartArea1);
+            this.chartBreak.ChartAreas.Add(chartArea1);
+            this.chartBreak.Dock = System.Windows.Forms.DockStyle.Fill;
             legend1.Name = "Legend1";
-            this.chartAttendance.Legends.Add(legend1);
-            this.chartAttendance.Location = new System.Drawing.Point(3, 3);
-            this.chartAttendance.Name = "chartAttendance";
+            this.chartBreak.Legends.Add(legend1);
+            this.chartBreak.Location = new System.Drawing.Point(0, 0);
+            this.chartBreak.MinimumSize = new System.Drawing.Size(10, 10);
+            this.chartBreak.Name = "chartBreak";
             series1.ChartArea = "ChartArea1";
             series1.Color = System.Drawing.Color.ForestGreen;
             series1.Legend = "Legend1";
             series1.Name = "Ontime";
             series2.ChartArea = "ChartArea1";
-            series2.Color = System.Drawing.Color.Orange;
+            series2.Color = System.Drawing.Color.Crimson;
             series2.Legend = "Legend1";
-            series2.Name = "Late";
-            series3.ChartArea = "ChartArea1";
-            series3.Color = System.Drawing.Color.Crimson;
-            series3.Legend = "Legend1";
-            series3.Name = "Over Break";
-            this.chartAttendance.Series.Add(series1);
-            this.chartAttendance.Series.Add(series2);
-            this.chartAttendance.Series.Add(series3);
-            this.chartAttendance.Size = new System.Drawing.Size(467, 272);
-            this.chartAttendance.TabIndex = 283;
-            this.chartAttendance.Text = "chart1";
+            series2.Name = "Over Break";
+            this.chartBreak.Series.Add(series1);
+            this.chartBreak.Series.Add(series2);
+            this.chartBreak.Size = new System.Drawing.Size(445, 323);
+            this.chartBreak.TabIndex = 284;
+            this.chartBreak.Text = "chart1";
             // 
-            // chartBreak
+            // chartAttendance
             // 
-            this.chartBreak.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             chartArea2.Name = "ChartArea1";
-            this.chartBreak.ChartAreas.Add(chartArea2);
+            this.chartAttendance.ChartAreas.Add(chartArea2);
+            this.chartAttendance.Dock = System.Windows.Forms.DockStyle.Fill;
             legend2.Name = "Legend1";
-            this.chartBreak.Legends.Add(legend2);
-            this.chartBreak.Location = new System.Drawing.Point(0, 13);
-            this.chartBreak.Name = "chartBreak";
+            this.chartAttendance.Legends.Add(legend2);
+            this.chartAttendance.Location = new System.Drawing.Point(0, 0);
+            this.chartAttendance.MinimumSize = new System.Drawing.Size(10, 10);
+            this.chartAttendance.Name = "chartAttendance";
+            series3.ChartArea = "ChartArea1";
+            series3.Color = System.Drawing.Color.ForestGreen;
+            series3.Legend = "Legend1";
+            series3.Name = "Ontime";
             series4.ChartArea = "ChartArea1";
-            series4.Color = System.Drawing.Color.ForestGreen;
+            series4.Color = System.Drawing.Color.Orange;
             series4.Legend = "Legend1";
-            series4.Name = "Ontime";
+            series4.Name = "Late";
             series5.ChartArea = "ChartArea1";
             series5.Color = System.Drawing.Color.Crimson;
             series5.Legend = "Legend1";
             series5.Name = "Over Break";
-            this.chartBreak.Series.Add(series4);
-            this.chartBreak.Series.Add(series5);
-            this.chartBreak.Size = new System.Drawing.Size(470, 194);
-            this.chartBreak.TabIndex = 284;
-            this.chartBreak.Text = "chart1";
+            this.chartAttendance.Series.Add(series3);
+            this.chartAttendance.Series.Add(series4);
+            this.chartAttendance.Series.Add(series5);
+            this.chartAttendance.Size = new System.Drawing.Size(445, 113);
+            this.chartAttendance.TabIndex = 283;
+            this.chartAttendance.Text = "chart1";
             // 
             // panel14
             // 
-            this.panel14.Controls.Add(this.splitContainer2);
+            this.panel14.Controls.Add(this.panel6);
             this.panel14.Controls.Add(this.dateLabel);
+            this.panel14.Controls.Add(this.splitContainer2);
             this.panel14.Controls.Add(this.splitContainer1);
             this.panel14.Controls.Add(this.refreshLbl);
             this.panel14.Controls.Add(this.panel5);
@@ -1278,14 +1276,114 @@
             this.panel14.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel14.Location = new System.Drawing.Point(53, 64);
             this.panel14.Name = "panel14";
-            this.panel14.Size = new System.Drawing.Size(1331, 602);
+            this.panel14.Size = new System.Drawing.Size(1313, 602);
             this.panel14.TabIndex = 280;
+            // 
+            // panel6
+            // 
+            this.panel6.BackColor = System.Drawing.Color.RoyalBlue;
+            this.panel6.Controls.Add(this.pictureBox12);
+            this.panel6.Controls.Add(this.totalEmployee);
+            this.panel6.Controls.Add(this.label4);
+            this.panel6.Location = new System.Drawing.Point(480, 87);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(182, 154);
+            this.panel6.TabIndex = 279;
+            // 
+            // pictureBox12
+            // 
+            this.pictureBox12.Image = global::SMTAttendance.Properties.Resources.icons8_employees_64;
+            this.pictureBox12.Location = new System.Drawing.Point(17, 39);
+            this.pictureBox12.Name = "pictureBox12";
+            this.pictureBox12.Size = new System.Drawing.Size(50, 77);
+            this.pictureBox12.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox12.TabIndex = 2;
+            this.pictureBox12.TabStop = false;
+            // 
+            // totalEmployee
+            // 
+            this.totalEmployee.AutoSize = true;
+            this.totalEmployee.Font = new System.Drawing.Font("Modern No. 20", 22.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.totalEmployee.ForeColor = System.Drawing.Color.Transparent;
+            this.totalEmployee.Location = new System.Drawing.Point(70, 86);
+            this.totalEmployee.Name = "totalEmployee";
+            this.totalEmployee.Size = new System.Drawing.Size(35, 40);
+            this.totalEmployee.TabIndex = 1;
+            this.totalEmployee.Text = "3";
+            this.totalEmployee.Click += new System.EventHandler(this.totalEmployee_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.Transparent;
+            this.label4.Location = new System.Drawing.Point(72, 24);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(107, 50);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Total\r\nEmployee";
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.LatePiechart);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
+            this.splitContainer2.Size = new System.Drawing.Size(445, 602);
+            this.splitContainer2.SplitterDistance = 158;
+            this.splitContainer2.TabIndex = 291;
+            // 
+            // LatePiechart
+            // 
+            chartArea3.Name = "ChartArea1";
+            this.LatePiechart.ChartAreas.Add(chartArea3);
+            this.LatePiechart.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend3.Name = "Legend1";
+            this.LatePiechart.Legends.Add(legend3);
+            this.LatePiechart.Location = new System.Drawing.Point(0, 0);
+            this.LatePiechart.MinimumSize = new System.Drawing.Size(10, 10);
+            this.LatePiechart.Name = "LatePiechart";
+            this.LatePiechart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
+            series6.ChartArea = "ChartArea1";
+            series6.Legend = "Legend1";
+            series6.Name = "Series1";
+            this.LatePiechart.Series.Add(series6);
+            this.LatePiechart.Size = new System.Drawing.Size(445, 158);
+            this.LatePiechart.TabIndex = 291;
+            this.LatePiechart.Text = "chart1";
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.chartAttendance);
+            // 
+            // splitContainer3.Panel2
+            // 
+            this.splitContainer3.Panel2.Controls.Add(this.chartBreak);
+            this.splitContainer3.Size = new System.Drawing.Size(445, 440);
+            this.splitContainer3.SplitterDistance = 113;
+            this.splitContainer3.TabIndex = 0;
             // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1387, 695);
+            this.ClientSize = new System.Drawing.Size(1369, 695);
             this.ContextMenuStrip = this.contextMenuStrip;
             this.Controls.Add(this.panel14);
             this.Controls.Add(this.sidebar);
@@ -1338,14 +1436,22 @@
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewLate)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBreak)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartBreak)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartAttendance)).EndInit();
+            this.panel14.ResumeLayout(false);
+            this.panel14.PerformLayout();
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).EndInit();
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chartAttendance)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.chartBreak)).EndInit();
-            this.panel14.ResumeLayout(false);
-            this.panel14.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LatePiechart)).EndInit();
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1442,10 +1548,16 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.DataGridView dataGridViewBreak;
         private System.Windows.Forms.Label dateLabel;
-        private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartAttendance;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartBreak;
         private System.Windows.Forms.Panel panel14;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.PictureBox pictureBox12;
+        private System.Windows.Forms.Label totalEmployee;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.DataVisualization.Charting.Chart LatePiechart;
     }
 }
 

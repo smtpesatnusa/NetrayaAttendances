@@ -94,9 +94,10 @@ namespace SMTAttendance
                         txtPassword.Clear();
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     MessagesHelper.Info("Connection Error");
+                    //MessageBox.Show(ex.Message);
                 }
             }
             else

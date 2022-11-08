@@ -329,7 +329,7 @@ namespace SMTAttendance
                     "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM(SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus " +
                     "FROM (SELECT badgeID, NAME, linecode, '-' AS ScheduleIn, '-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE shift = 'Normal' AND badgeID " +
                     "NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b " +
-                    "WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A ) AS a ORDER BY sttus, schedulein";                    
+                    "WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A ) AS a ORDER BY sttus, schedulein";
 
                 StartProgress("Loading...");
 
@@ -401,8 +401,8 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     " DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";                     
-                    
+                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";
+
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -410,7 +410,7 @@ namespace SMTAttendance
                     if (dset.Tables[0].Rows.Count > 0)
                     {
                         dataGridViewOntimeList.DataSource = dset.Tables[0];
-                    }                        
+                    }
                 }
                 totalLbl.Text = dataGridViewOntimeList.Rows.Count.ToString();
             }
@@ -501,7 +501,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";                                      
+                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -592,7 +592,7 @@ namespace SMTAttendance
                 string query = "(SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT badgeID, NAME, linecode, '-' AS ScheduleIn, " +
                     "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE badgeID NOT IN (SELECT b.badgeID FROM tbl_attendance a, tbl_employee b " +
                     "WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A ) ORDER BY intime";
-                   
+
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -622,8 +622,8 @@ namespace SMTAttendance
                 string query = "(SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT badgeID, NAME, shift, linecode, '-' AS ScheduleIn, '-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE shift = 'Normal' AND " +
                     "badgeID NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND " +
-                    "intime IS NOT NULL)) AS A ) ORDER BY intime"; 
-                
+                    "intime IS NOT NULL)) AS A ) ORDER BY intime";
+
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataSet dset = new DataSet();
@@ -709,7 +709,7 @@ namespace SMTAttendance
             cmbShift.SelectedIndex = -1;
 
             // reset datagridview
-            DataGridView[] dgv = { dataGridViewAllList, dataGridViewOntimeList, dataGridViewLateList , dataGridViewAbsent};
+            DataGridView[] dgv = { dataGridViewAllList, dataGridViewOntimeList, dataGridViewLateList, dataGridViewAbsent };
             for (int i = 0; i < dgv.Length; i++)
             {
                 // remove data in datagridview result
@@ -728,7 +728,7 @@ namespace SMTAttendance
             LoadDataOntime();
             LoadDataLate();
             LoadDataAbsent();
-        }        
+        }
 
 
         private void refreshLbl_Click(object sender, EventArgs e)
@@ -897,38 +897,36 @@ namespace SMTAttendance
         {
             try
             {
-                if (dataGridViewAllList.Rows.Count > 0)
+                string search = tbSearchAll.Text.Replace("'", "''");
+
+                if (tbSearchAll.Text == "")
                 {
-                    string search = tbSearchAll.Text.Replace("'", "''");
-
-                    if (tbSearchAll.Text == "")
-                    {
-                        LoadData();
-                    }
-                    else
-                    {
-                        string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, " +
-                    "DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
-                    "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC)  AS a where" +
-                    " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
-                    "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')" +
-                    "UNION SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT badgeID, NAME, linecode, '-' AS ScheduleIn, " +
-                    "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE badgeID NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b " +
-                    "WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A ) AS a where" +
-                    " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
-                    "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')";
-
-
-                        //"SELECT b.badgeId, b.name, b.dept, b.linecode, RIGHT(MIN(a.datetimeAbsent),8) AS clockIn FROM tbl_inout a, tbl_employee b WHERE a.indicator = 'in' " +
-                        //"AND a.rfidNo = b.rfidNo AND(a.datetimeAbsent BETWEEN '" + dateSelected + " 00:00:01' AND '" + dateSelected + " 23:59:59') AND b.dept = '" + dept + "' " +
-                        //"AND (b.badgeId LIKE '%" + search + "%' OR b.name LIKE '%" + search + "%' OR b.dept LIKE '%" + search + "%'OR b.linecode LIKE '%" + search + "%'OR a.datetimeAbsent LIKE '%" + search + "%' ) GROUP BY a.rfidNo, b.badgeId, b.name, b.dept, b.linecode, a.indicator  ";
-
-                        LoadDS(query);
-                        FillGrid();
-                        totalLblAll.Text = dtSource.Rows.Count.ToString();
-                    }
+                    LoadData();
                 }
+                else
+                {
+                    string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, " +
+                "DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
+                "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
+                "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC)  AS a where" +
+                " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
+                "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')" +
+                "UNION SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT badgeID, NAME, linecode, '-' AS ScheduleIn, " +
+                "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE badgeID NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b " +
+                "WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A ) AS a where" +
+                " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
+                "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')";
+
+
+                    //"SELECT b.badgeId, b.name, b.dept, b.linecode, RIGHT(MIN(a.datetimeAbsent),8) AS clockIn FROM tbl_inout a, tbl_employee b WHERE a.indicator = 'in' " +
+                    //"AND a.rfidNo = b.rfidNo AND(a.datetimeAbsent BETWEEN '" + dateSelected + " 00:00:01' AND '" + dateSelected + " 23:59:59') AND b.dept = '" + dept + "' " +
+                    //"AND (b.badgeId LIKE '%" + search + "%' OR b.name LIKE '%" + search + "%' OR b.dept LIKE '%" + search + "%'OR b.linecode LIKE '%" + search + "%'OR a.datetimeAbsent LIKE '%" + search + "%' ) GROUP BY a.rfidNo, b.badgeId, b.name, b.dept, b.linecode, a.indicator  ";
+
+                    LoadDS(query);
+                    FillGrid();
+                    totalLblAll.Text = dtSource.Rows.Count.ToString();
+                }
+
             }
             catch (Exception ex)
             {
