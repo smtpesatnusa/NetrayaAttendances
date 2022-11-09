@@ -46,9 +46,6 @@ namespace SMTAttendance
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
-            string koneksi = ConnectionDB.strProvider;
-            myConn = new MySqlConnection(koneksi);
-
             if (tbRFID.Text == "" || tbBadgeid.Text == "" || tbName.Text == "" || cmbGender.Text == "" ||  dateTimePickerDOJ.Text == "" 
                 || cmbLevel.Text == "" || cmbDepartment.Text == "" || cmbLineCode.Text == "" || cmbShift.Text == "" || cmbWorkarea.Text == "")
             {
@@ -63,6 +60,9 @@ namespace SMTAttendance
             {                
                 try
                 {
+                    string koneksi = ConnectionDB.strProvider;
+                    myConn = new MySqlConnection(koneksi);
+
                     var cmd = new MySqlCommand("", myConn);
                     string rfid = tbRFID.Text;
                     string badgeid = tbBadgeid.Text;
@@ -113,7 +113,7 @@ namespace SMTAttendance
                                     cmd.ExecuteNonQuery();
                                 }
                             }
-                            else if (shift == "Shift" || shift == "shift")
+                            else 
                             {
                                 // insert data workday employee
                                 string workday = "6";
