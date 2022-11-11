@@ -322,7 +322,7 @@ namespace SMTAttendance
             this.tbSearch.Text = "";
             this.tbSearch.TrailingIcon = null;
             this.tbSearch.UseTallSize = false;
-            this.tbSearch.Visible = false;
+            this.tbSearch.TextChanged += new System.EventHandler(this.tbSearch_TextChanged);
             // 
             // monthSelected
             // 

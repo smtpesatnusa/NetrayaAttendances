@@ -399,7 +399,7 @@ namespace SMTAttendance
             i = dataGridViewScheduleList.SelectedCells[0].RowIndex;
             string badgeslctd = dataGridViewScheduleList.Rows[i].Cells[0].Value.ToString();
             string nameslctd = dataGridViewScheduleList.Rows[i].Cells[1].Value.ToString();
-            string shiftslctd = dataGridViewScheduleList.Rows[i].Cells[2].Value.ToString().ToLower();
+            string shiftslctd = dataGridViewScheduleList.Rows[i].Cells[2].Value.ToString();
             string linecodeslctd = dataGridViewScheduleList.Rows[i].Cells[3].Value.ToString();
 
             int date = e.ColumnIndex - 3;
@@ -413,7 +413,7 @@ namespace SMTAttendance
                 editSchedule.tbName.Text = nameslctd;
                 editSchedule.tbShift.Text = shiftslctd;
                 editSchedule.tbLineCode.Text = linecodeslctd;
-                editSchedule.tbSchedule.Text = dataGridViewScheduleList.Rows[i].Cells[e.ColumnIndex].Value.ToString();
+                //editSchedule.tbSchedule.Text = dataGridViewScheduleList.Rows[i].Cells[e.ColumnIndex].Value.ToString();
                 editSchedule.ShowDialog();
             }
         }
@@ -563,6 +563,56 @@ namespace SMTAttendance
             finally
             {
                 myConn.Dispose();
+            }
+        }
+
+        private void tbSearch_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                string search = tbSearch.Text.Replace("'", "''");
+
+                if (tbSearch.Text == "")
+                {
+                    loadData();
+                }
+                else
+                {
+                    // get month year datepicker
+                    string _Date = dateTimePickerDate.Text;
+                    DateTime dt = Convert.ToDateTime(_Date);
+                    year = Convert.ToInt32(dt.ToString("yyyy"));
+                    month = Convert.ToInt32(dt.ToString("MM"));
+
+                    totalDay = DateTime.DaysInMonth(year, month);
+
+                    monthSelected.Text = _Date;
+
+                    // to run qry statement based on total day
+                    string qryShift = "";
+                    string qryNormal = "";
+
+                    for (int i = 1; i <= totalDay; i++)
+                    {
+                        qryShift += "MAX(CASE WHEN date='" + year + "-" + month + "-" + i + "' THEN b.name ELSE '-' END) AS '" + i + "',";
+                        qryNormal += "c.shift AS '" + i + "',";
+                    }
+                    qryShift = qryShift.Remove(qryShift.Length - 1);
+                    qryNormal = qryNormal.Remove(qryNormal.Length - 1);
+                    //-----------
+
+                    Sql = "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryShift + " FROM tbl_attendance a, tbl_mastershiftdetail b, tbl_employee c  " +
+                        "WHERE shift<> 'Normal' AND a.emplid = c.id AND a.shiftid = b.id AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY c.badgeId, c.name, c.shift, c.linecode UNION " +
+                        "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
+                        "WHERE shift = 'Normal' AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";                    
+                    LoadDS(Sql);
+                    FillGrid();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 

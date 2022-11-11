@@ -8,7 +8,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace SMTAttendance
 {
-    public partial class MainMenu : MaterialForm
+    public partial class MainMenus : MaterialForm
     {
         readonly Helper help = new Helper();
 
@@ -26,7 +26,7 @@ namespace SMTAttendance
         bool sidebarExpand;
         MySqlConnection myConn;
 
-        public MainMenu()
+        public MainMenus()
         {
             InitializeComponent();
             CustomizeDesign();
@@ -35,6 +35,7 @@ namespace SMTAttendance
         private void CustomizeDesign()
         {
             panelEmployeeMenu.Visible = false;
+            panelLeave.Visible = false;
         }
 
         private void showSubMenu(Panel SubMenu)
@@ -102,6 +103,10 @@ namespace SMTAttendance
             {
                 panelEmployeeMenu.Visible = false;
             }
+            if (panelLeave.Visible == true)
+            {
+                panelLeave.Visible = false;
+            }
         }
 
         private void defaultColorPanel()
@@ -121,6 +126,8 @@ namespace SMTAttendance
             panel12.BackColor = Color.FromArgb(48, 63, 159);
             panel12.ForeColor = Color.White;
 
+            panel15.BackColor = Color.FromArgb(48, 63, 159);
+            panel15.ForeColor = Color.White;
         }
 
 
@@ -299,8 +306,8 @@ namespace SMTAttendance
 
                 fillChart();
 
-                // load data late in datagridview c#
-                LoadDataLate();
+                //// load data late in datagridview c#
+                //LoadDataLate();
 
                 // load data break > 3 in datagridview c#
                 LoadDataBreakTime();
@@ -517,30 +524,30 @@ namespace SMTAttendance
             }
         }
 
-        private void LoadDataLate()
-        {
-            dateNow = DateTime.Now.ToString("yyyy-MM-dd");
+        //private void LoadDataLate()
+        //{
+        //    dateNow = DateTime.Now.ToString("yyyy-MM-dd");
 
-            try
-            {
-                string query = "(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, intime FROM (SELECT e.linecode, " +
-                    "f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
-                    "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, " +
-                    "'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
-                    "AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
-                    "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)";
-                using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
-                {
-                    DataSet dset = new DataSet();
-                    adpt.Fill(dset);
-                    dataGridViewLate.DataSource = dset.Tables[0];
-                }
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show("LoadDataLate; " + ex.Message);
-            }
-        }
+        //    try
+        //    {
+        //        string query = "(SELECT linecode, DESCRIPTION AS section, NAME, ScheduleIn, ScheduleOut, intime, outtime FROM (SELECT e.linecode, " +
+        //            "f.description, e.name, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.ScheduleOut, '%H:%i') AS ScheduleOut, " +
+        //            "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, IF(a.intime > a.ScheduleIn, " +
+        //            "'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid " +
+        //            "AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateNow + "' AND a.DayType = 'WorkDay' AND a.ScheduleIn " +
+        //            "IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime DESC, NAME ASC)";
+        //        using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
+        //        {
+        //            DataSet dset = new DataSet();
+        //            adpt.Fill(dset);
+        //            dataGridViewLate.DataSource = dset.Tables[0];
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //MessageBox.Show("LoadDataLate; " + ex.Message);
+        //    }
+        //}
 
         // to display breaktime more than 60
         private void LoadDataBreakTime()
@@ -549,9 +556,14 @@ namespace SMTAttendance
 
             try
             {
-                string query = "SELECT linecode, DESCRIPTION AS section, badgeid,NAME, totalbreak FROM (SELECT b.linecode, c.description, b.badgeId, b.name, " +
+                // abikan packing boy
+                string query = "SELECT linecode, DESCRIPTION AS section, badgeid, NAME, totalbreak FROM (SELECT b.linecode, c.description, b.badgeId, b.name, b.level, " +
                     "SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b, tbl_masterlinecode c WHERE a.emplid = b.id AND b.linecode = c.name " +
-                    "AND a.date = '" + dateNow + "' GROUP BY b.linecode, c.description ,b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
+                    "AND b.level <> 'PB' AND a.date = '" + dateNow + "' GROUP BY b.linecode, c.description ,b.badgeId, b.name, b.level) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
+
+                //"SELECT linecode, DESCRIPTION AS section, badgeid,NAME, totalbreak FROM (SELECT b.linecode, c.description, b.badgeId, b.name, " +
+                //"SUM(a.duration) AS totalBreak FROM tbl_durationbreak a, tbl_employee b, tbl_masterlinecode c WHERE a.emplid = b.id AND b.linecode = c.name " +
+                //"AND a.date = '" + dateNow + "' GROUP BY b.linecode, c.description ,b.badgeId, b.name) AS a WHERE totalbreak > 90 ORDER BY totalbreak";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -954,18 +966,18 @@ namespace SMTAttendance
 
                 dateLabel.Text = DateTime.Now.ToString("dddd, dd MMMM yyyy");
 
-                // remove data in datagridview result
-                this.dataGridViewLate.DoubleBuffered(true);
-                dataGridViewLate.DataSource = null;
-                dataGridViewLate.Refresh();
+                //// remove data in datagridview result
+                //this.dataGridViewLate.DoubleBuffered(true);
+                //dataGridViewLate.DataSource = null;
+                //dataGridViewLate.Refresh();
 
-                while (dataGridViewLate.Columns.Count > 0)
-                {
-                    dataGridViewLate.Columns.RemoveAt(0);
-                }
+                //while (dataGridViewLate.Columns.Count > 0)
+                //{
+                //    dataGridViewLate.Columns.RemoveAt(0);
+                //}
 
-                dataGridViewLate.Update();
-                dataGridViewLate.Refresh();
+                //dataGridViewLate.Update();
+                //dataGridViewLate.Refresh();
 
                 this.dataGridViewBreak.DoubleBuffered(true);
                 dataGridViewBreak.DataSource = null;
@@ -1062,6 +1074,16 @@ namespace SMTAttendance
 
             hideSubMenu();
             showSubMenu(panelEmployeeMenu);
+        }
+
+        private void buttonLeave_Click(object sender, EventArgs e)
+        {
+            defaultColorPanel();
+            panel15.BackColor = System.Drawing.Color.FromArgb(63, 81, 181);
+            panel15.ForeColor = System.Drawing.Color.White;
+
+            hideSubMenu();
+            showSubMenu(panelLeave);
         }
 
         private void buttonDashboard_Click(object sender, EventArgs e)
@@ -1166,61 +1188,6 @@ namespace SMTAttendance
             this.Hide();
         }
 
-        private void dataGridViewLate_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (this.dataGridViewLate.SelectedRows.Count > 0)
-            {
-                int i;
-                i = dataGridViewLate.SelectedCells[0].RowIndex;
-                string linecodeslctd = dataGridViewLate.Rows[i].Cells[0].Value.ToString();
-                string sectionslctd = dataGridViewLate.Rows[i].Cells[1].Value.ToString();
-                string nameslctd = dataGridViewLate.Rows[i].Cells[2].Value.ToString();
-                string scheduleInslctd = dataGridViewLate.Rows[i].Cells[3].Value.ToString();
-                string scheduleOutslctd = dataGridViewLate.Rows[i].Cells[4].Value.ToString();
-
-                // convert date format
-                string _Date = dateLabel.Text;
-                DateTime dt = Convert.ToDateTime(_Date);
-
-                EditAttendance editAttendance = new EditAttendance();
-                editAttendance.userdetail.Text = userdetail.Text;
-                editAttendance.tbDateSchedule.Text = dt.ToString("yyyy-MM-dd");
-                editAttendance.tbLineCode.Text = linecodeslctd;
-                editAttendance.tbSection.Text = sectionslctd;
-                editAttendance.tbName.Text = nameslctd;
-                //editAttendance.dateTimePickerIn.Text = intimeslctd;
-                editAttendance.ShowDialog();
-            }
-        }
-
-        private void timerScroll_Tick(object sender, EventArgs e)
-        {
-            //Scroll late
-            if (dataGridViewLate.CurrentRow == null) return;
-            if (dataGridViewLate.CurrentRow.Index + 1 >= 0 && dataGridViewLate.CurrentRow.Index + 1 < dataGridViewLate.RowCount)
-            {
-                dataGridViewLate.CurrentCell = dataGridViewLate.Rows[dataGridViewLate.CurrentRow.Index + 1].Cells[0];
-                dataGridViewLate.Rows[dataGridViewLate.CurrentCell.RowIndex].Selected = true;
-                //dataGridViewLate.Rows[dataGridViewLate.CurrentCell.RowIndex].DefaultCellStyle.Font = new Font(Font, FontStyle.Bold);   // Set Bold   
-            }
-            if (dataGridViewLate.CurrentRow.Index + 1 == dataGridViewLate.RowCount)
-            {
-                dataGridViewLate.CurrentCell = dataGridViewLate.Rows[0].Cells[0];
-            }
-
-            // scroll break
-            if (dataGridViewBreak.CurrentRow == null) return;
-            if (dataGridViewBreak.CurrentRow.Index + 1 >= 0 && dataGridViewBreak.CurrentRow.Index + 1 < dataGridViewBreak.RowCount)
-            {
-                dataGridViewBreak.CurrentCell = dataGridViewBreak.Rows[dataGridViewBreak.CurrentRow.Index + 1].Cells[0];
-                dataGridViewBreak.Rows[dataGridViewBreak.CurrentCell.RowIndex].Selected = true;
-            }
-            if (dataGridViewBreak.CurrentRow.Index + 1 == dataGridViewBreak.RowCount)
-            {
-                dataGridViewBreak.CurrentCell = dataGridViewBreak.Rows[0].Cells[0];
-            }
-        }
-
         private void pictureBox10_Click(object sender, EventArgs e)
         {
             sidebarTimer.Start();
@@ -1297,11 +1264,6 @@ namespace SMTAttendance
         private void menuButton_Click(object sender, EventArgs e)
         {
             sidebarTimer.Start();
-        }
-
-        private void dataGridViewLate_Paint(object sender, PaintEventArgs e)
-        {
-            help.norecord_dgv(dataGridViewLate, e);
         }
 
         private void dataGridViewBreak_Paint(object sender, PaintEventArgs e)

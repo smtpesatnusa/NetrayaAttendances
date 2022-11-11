@@ -44,7 +44,7 @@ namespace SMTAttendance
                     help.displayCmbList("SELECT * FROM tbl_masterdepartment where name = '" + dept + "' ORDER BY id ", "name", "name", cmbDepartment);
                 }
 
-                //"SELECT name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift FROM tbl_employee ORDER BY id DESC";
+                
                 string query = "SELECT id, name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift, workarea FROM tbl_employee where rfidNo ='" + tbRFID.Text + "'";
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
