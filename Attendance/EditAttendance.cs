@@ -35,6 +35,8 @@ namespace SMTAttendance
                     "tbl_employee b, tbl_mastershiftdetail c WHERE b.name = '" + tbName.Text + "' AND b.linecode = '" + tbLineCode.Text + "' " +
                     "AND a.date = '" + tbDateSchedule.Text + "' AND a.emplid = b.id AND a.shiftid = c.id";
 
+                //MessageBox.Show(query);
+
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
                     DataTable dset = new DataTable();

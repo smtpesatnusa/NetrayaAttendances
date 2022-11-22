@@ -158,7 +158,6 @@ namespace SMTAttendance
             this.tbDateSchedule.Size = new System.Drawing.Size(145, 26);
             this.tbDateSchedule.TabIndex = 260;
             this.tbDateSchedule.Text = "Date Schedule";
-            this.tbDateSchedule.Visible = false;
             // 
             // label4
             // 

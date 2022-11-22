@@ -285,6 +285,7 @@
             this.dataGridViewAllList.Size = new System.Drawing.Size(852, 278);
             this.dataGridViewAllList.TabIndex = 11;
             this.dataGridViewAllList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAttendanceList_CellContentClick);
+            this.dataGridViewAllList.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAllList_CellDoubleClick);
             // 
             // tabPage8
             // 
@@ -602,7 +603,7 @@
             this.toolStripStatusLabel1.BackColor = System.Drawing.SystemColors.Control;
             this.toolStripStatusLabel1.Font = new System.Drawing.Font("Open Sans", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(287, 20);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(292, 20);
             this.toolStripStatusLabel1.Text = "Developed by IT-PE SMT Dept with ❤  | ";
             // 
             // dateTimeNow
