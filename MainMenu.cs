@@ -936,6 +936,13 @@ namespace SMTAttendance
             this.Hide();
         }
 
+        private void emailTemplateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EmailTemplate emailTemplate = new EmailTemplate();
+            emailTemplate.userdetail.Text = userdetail.Text;
+            emailTemplate.ShowDialog();
+        }
+
         private void refreshLbl_Click(object sender, EventArgs e)
         {
             refresh();
@@ -1220,6 +1227,7 @@ namespace SMTAttendance
                 dataGridViewBreak.CurrentCell = dataGridViewBreak.Rows[0].Cells[0];
             }
         }
+
 
         private void pictureBox10_Click(object sender, EventArgs e)
         {

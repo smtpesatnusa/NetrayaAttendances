@@ -289,10 +289,10 @@ namespace SMTAttendance
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, " +
                     "tbl_masterlinecode f WHERE e.id = a.emplid AND e.linecode = f.name " +
-                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
+                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
                     "SELECT linecode, DESCRIPTION AS section, badgeID, NAME, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT e.badgeID, e.NAME, e.linecode, f.description, '-' AS ScheduleIn,'-' AS intime, '-' AS outtime, 'Absent' AS Sttus " +
-                    "FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.dept = 'SMT' AND e.badgeID NOT IN(SELECT b.badgeID FROM " +
+                    "FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.dept = '"+dept+"' AND e.badgeID NOT IN(SELECT b.badgeID FROM " +
                     "tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A " +
                     "ORDER BY FIELD(sttus, 'Ontime', 'Late', 'Absent'), schedulein, linecode, NAME";
 
@@ -331,7 +331,7 @@ namespace SMTAttendance
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, " +
                     "tbl_masterlinecode f WHERE e.id = a.emplid AND e.linecode = f.name " +
-                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "'  AND e.shift = 'Normal' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
+                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "'  AND e.shift = 'Normal' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
                     "SELECT linecode, DESCRIPTION AS section, badgeID, NAME, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT e.badgeID, e.NAME, e.linecode, f.description, '-' AS ScheduleIn,'-' AS intime, '-' AS outtime, 'Absent' AS Sttus " +
                     "FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.dept = '"+dept+"' AND e.badgeID NOT IN(SELECT b.badgeID FROM " +
@@ -371,7 +371,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, " +
                     "DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' AND e.shift <> 'Normal' " +
-                    "AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
+                    "AND a.date = '" + dateSelected + "' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A UNION " +
                     "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM(SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus " +
                     "FROM (SELECT badgeID, NAME, linecode, '-' AS ScheduleIn, '-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee WHERE shift <> 'Normal' AND badgeID " +
                     "NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b " +
@@ -410,7 +410,7 @@ namespace SMTAttendance
                     "(SELECT e.badgeID, e.name, e.linecode, f.description, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f WHERE e.id = a.emplid  AND e.linecode = f.name " +
-                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY schedulein, linecode, NAME";
+                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.intime IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY schedulein, linecode, NAME";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -444,7 +444,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     " DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND e.shift = 'Normal' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";
+                    "AND a.date = '" + dateSelected + "' AND e.shift = 'Normal' AND a.intime IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -477,7 +477,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     " DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND e.shift <> 'Normal' AND a.ScheduleIn IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";
+                    "AND a.date = '" + dateSelected + "' AND e.shift <> 'Normal' AND a.intime IS NOT NULL AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Ontime' ORDER BY intime";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -512,7 +512,7 @@ namespace SMTAttendance
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, tbl_masterlinecode f " +
                     "WHERE e.id = a.emplid AND e.linecode = f.name AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND " +
-                    "a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY schedulein, linecode, NAME";
+                    "a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY schedulein, linecode, NAME";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -542,7 +542,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND e.shift = 'Normal' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";
+                    "AND a.date = '" + dateSelected + "' AND e.shift = 'Normal' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -572,7 +572,7 @@ namespace SMTAttendance
                 string query = "SELECT badgeID, NAME, linecode, ScheduleIn, intime, outtime, Sttus FROM (SELECT e.badgeID, e.name, e.linecode, DATE_FORMAT(a.ScheduleIn, '%H:%i') AS ScheduleIn, " +
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e WHERE e.id = a.emplid AND e.dept = '" + dept + "' " +
-                    "AND a.date = '" + dateSelected + "' AND e.shift <> 'Normal' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";
+                    "AND a.date = '" + dateSelected + "' AND e.shift <> 'Normal' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A WHERE Sttus = 'Late' ORDER BY intime";
 
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
                 {
@@ -603,7 +603,7 @@ namespace SMTAttendance
                 string query = "(SELECT linecode, DESCRIPTION AS section, badgeID, NAME, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT e.badgeID, e.NAME, e.linecode, f.description, '-' AS ScheduleIn, " +
                     "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name  AND e.badgeID " +
-                    "NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '2022-11-22' AND b.dept = 'SMT' " +
+                    "NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '"+dateSelected+"' AND b.dept = '"+dept+"' " +
                     "AND intime IS NOT NULL)) AS A ) ORDER BY intime";
                     
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
@@ -933,13 +933,13 @@ namespace SMTAttendance
                     "DATE_FORMAT(a.intime, '%H:%i') AS intime, DATE_FORMAT(a.outtime, '%H:%i') AS outtime, " +
                     "IF(a.intime > a.ScheduleIn, 'Late', 'Ontime') AS Sttus FROM tbl_attendance a, tbl_employee e, " +
                     "tbl_masterlinecode f WHERE e.id = a.emplid AND e.linecode = f.name " +
-                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.ScheduleIn IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A where" +
+                    "AND e.dept = '" + dept + "' AND a.date = '" + dateSelected + "' AND a.intime IS NOT NULL ORDER BY a.ScheduleIn ASC) AS A where" +
                     " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
                     "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')" +
                     " UNION " +
                     "SELECT linecode, DESCRIPTION AS section, badgeID, NAME, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT e.badgeID, e.NAME, e.linecode, f.description, '-' AS ScheduleIn,'-' AS intime, '-' AS outtime, 'Absent' AS Sttus " +
-                    "FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.dept = 'SMT' AND e.badgeID NOT IN(SELECT b.badgeID FROM " +
+                    "FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.dept = '"+dept+"' AND e.badgeID NOT IN(SELECT b.badgeID FROM " +
                     "tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '" + dateSelected + "' AND b.dept = '" + dept + "' AND intime IS NOT NULL) ) AS A  where" +
                     " (badgeID  LIKE '%" + search + "%' OR NAME LIKE '%" + search + "%' OR linecode LIKE '%" + search + "%' OR ScheduleIn LIKE '%" + search + "%' " +
                     "OR intime LIKE '%" + search + "%' OR outtime LIKE '%" + search + "%' OR Sttus LIKE '%" + search + "%')";
