@@ -230,16 +230,20 @@ namespace SMTAttendance
                 for (int i = 1; i <= totalDay; i++)
                 {
                     qryShift += "MAX(CASE WHEN date='" + year + "-" + month + "-" + i + "' THEN b.name ELSE '-' END) AS '" + i + "',";
-                    qryNormal += "c.shift AS '" + i + "',";
+                    //qryNormal += "c.shift AS '" + i + "',";
                 }
                 qryShift = qryShift.Remove(qryShift.Length - 1);
-                qryNormal = qryNormal.Remove(qryNormal.Length - 1);
+                //qryNormal = qryNormal.Remove(qryNormal.Length - 1);
                 //-----------
 
                 Sql = "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryShift + " FROM tbl_attendance a, tbl_mastershiftdetail b, tbl_employee c  " +
-                    "WHERE shift<> 'Normal' AND a.emplid = c.id AND a.shiftid = b.id GROUP BY c.badgeId, c.name, c.shift, c.linecode UNION " +
-                    "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
-                    "WHERE shift = 'Normal' GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";
+                   "WHERE a.emplid = c.id AND a.shiftid = b.id GROUP BY c.badgeId, c.name, c.shift, c.linecode ORDER BY c.name ";
+
+                //Sql = "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryShift + " FROM tbl_attendance a, tbl_mastershiftdetail b, tbl_employee c  " +
+                //    "WHERE shift<> 'Normal' AND a.emplid = c.id AND a.shiftid = b.id GROUP BY c.badgeId, c.name, c.shift, c.linecode UNION " +
+                //    "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
+                //    "WHERE shift = 'Normal' GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";
+
 
                 StartProgress("Loading...");
 
@@ -595,16 +599,19 @@ namespace SMTAttendance
                     for (int i = 1; i <= totalDay; i++)
                     {
                         qryShift += "MAX(CASE WHEN date='" + year + "-" + month + "-" + i + "' THEN b.name ELSE '-' END) AS '" + i + "',";
-                        qryNormal += "c.shift AS '" + i + "',";
+                        //qryNormal += "c.shift AS '" + i + "',";
                     }
                     qryShift = qryShift.Remove(qryShift.Length - 1);
-                    qryNormal = qryNormal.Remove(qryNormal.Length - 1);
+                    //qryNormal = qryNormal.Remove(qryNormal.Length - 1);
                     //-----------
 
                     Sql = "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryShift + " FROM tbl_attendance a, tbl_mastershiftdetail b, tbl_employee c  " +
-                        "WHERE shift<> 'Normal' AND a.emplid = c.id AND a.shiftid = b.id AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY c.badgeId, c.name, c.shift, c.linecode UNION " +
-                        "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
-                        "WHERE shift = 'Normal' AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";                    
+                        "WHERE a.emplid = c.id AND a.shiftid = b.id AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY c.badgeId, c.name, c.shift, c.linecode ORDER BY c.name";
+
+                    //Sql = "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryShift + " FROM tbl_attendance a, tbl_mastershiftdetail b, tbl_employee c  " +
+                    //    "WHERE shift<> 'Normal' AND a.emplid = c.id AND a.shiftid = b.id AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY c.badgeId, c.name, c.shift, c.linecode UNION " +
+                    //    "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
+                    //    "WHERE shift = 'Normal' AND (c.badgeId LIKE '%" + search + "%' OR c.name LIKE '%" + search + "%') GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";                    
                     LoadDS(Sql);
                     FillGrid();
                 }

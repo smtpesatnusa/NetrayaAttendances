@@ -12,6 +12,8 @@ namespace SMTAttendance
         string idUser, dept;
         MySqlConnection myConn;
 
+        string oriRfid;
+
         public DetailEmployee()
         {
             InitializeComponent();
@@ -44,6 +46,7 @@ namespace SMTAttendance
                     help.displayCmbList("SELECT * FROM tbl_masterdepartment where name = '" + dept + "' ORDER BY id ", "name", "name", cmbDepartment);
                 }
 
+                
                 
                 string query = "SELECT id, name, level, dept, badgeID, rfidNo, doj, linecode, gender, shift, workarea FROM tbl_employee where rfidNo ='" + tbRFID.Text + "'";
                 using (MySqlDataAdapter adpt = new MySqlDataAdapter(query, myConn))
@@ -201,7 +204,7 @@ namespace SMTAttendance
 
                     myConn.Open();
 
-                    // insert schedule if employee is normal shift and update data tbl_employee
+                    // insert schedule if employee is normal and update data tbl_employee
                     if (shift == "Normal" || shift == "normal")
                     {
                         // query update employee

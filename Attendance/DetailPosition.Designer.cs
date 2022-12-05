@@ -310,7 +310,6 @@ namespace SMTAttendance
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.TopMost = true;
             this.Load += new System.EventHandler(this.DetailPosition_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewPositionList)).EndInit();
             this.tabControl1.ResumeLayout(false);

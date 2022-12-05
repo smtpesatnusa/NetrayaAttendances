@@ -218,6 +218,7 @@ namespace SMTAttendance
                             case "PC": point.Color = Color.MediumPurple; break;
                             case "QC": point.Color = Color.HotPink; break;
                             case "STORE": point.Color = Color.Salmon; break;
+                            case "CS": point.Color = Color.Gold; break;
                         }
                     }
                 }

@@ -8,8 +8,8 @@ namespace SMTAttendance
     public partial class SelectedGroupEmployee : MaterialForm
     {
         Helper help = new Helper();
-
         string allItems;
+
         public SelectedGroupEmployee()
         {
             InitializeComponent();
