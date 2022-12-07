@@ -602,7 +602,7 @@ namespace SMTAttendance
             {
                 string query = "(SELECT linecode, DESCRIPTION AS section, badgeID, NAME, ScheduleIn, intime, outtime, Sttus FROM " +
                     "(SELECT e.badgeID, e.NAME, e.linecode, f.description, '-' AS ScheduleIn, " +
-                    "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name  AND e.badgeID " +
+                    "'-' AS intime, '-' AS outtime, 'Absent' AS Sttus FROM tbl_employee e, tbl_masterlinecode f WHERE e.linecode = f.name AND e.status = 1 AND e.badgeID " +
                     "NOT IN(SELECT b.badgeID FROM tbl_attendance a, tbl_employee b WHERE a.EmplId = b.id AND a.date = '"+dateSelected+"' AND b.dept = '"+dept+"' " +
                     "AND intime IS NOT NULL)) AS A ) ORDER BY intime";
                     
@@ -697,7 +697,6 @@ namespace SMTAttendance
                 (dataGridViewOntimeList.DataSource as DataTable).DefaultView.RowFilter =
                     string.Format("badgeID LIKE '%" + search + "%'or section LIKE '%" + search + "%'or NAME LIKE '%" + search + "%'or linecode LIKE '%" + search + "%' " +
                     "or scheduleIn LIKE '%" + search + "%' or intime LIKE '%" + search + "%' or outtime LIKE '%" + search + "%' or Sttus LIKE '%" + search + "%'");
-
 
                 // to display total data
                 totalLbl.Text = dataGridViewOntimeList.Rows.Count.ToString();

@@ -244,7 +244,6 @@ namespace SMTAttendance
                 //    "SELECT c.badgeId, c.name, c.shift, c.linecode,  " + qryNormal + " FROM tbl_employee c " +
                 //    "WHERE shift = 'Normal' GROUP BY  c.badgeId, c.name, c.linecode, c.shift ORDER BY NAME";
 
-
                 StartProgress("Loading...");
 
                 LoadDS(Sql);
